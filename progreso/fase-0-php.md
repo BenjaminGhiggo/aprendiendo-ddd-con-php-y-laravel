@@ -52,10 +52,10 @@ Cada lección en formato **formulario**, marcada ✅ cuando está escrita y **ve
 - [x] **08 — Módulos, Composer y primer PHPUnit** — ✅ formulario
 
 ### Programación Orientada a Objetos (POO)
-- [ ] **09 — Encapsulación**
-- [ ] **10 — Herencia**
-- [ ] **11 — Polimorfismo**
-- [ ] **12 — Abstracción**
+- [x] **09 — Encapsulación** — ✅ formulario
+- [x] **10 — Herencia** — ✅ formulario
+- [x] **11 — Polimorfismo** — ✅ formulario
+- [x] **12 — Abstracción** — ✅ formulario
 
 ### SOLID
 - [ ] **13 — SRP**
