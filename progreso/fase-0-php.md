@@ -41,10 +41,10 @@ Cada lección en formato **formulario**, marcada ✅ cuando está escrita y **ve
 `.php` corren, PHPUnit verde con la solución, Mermaid válido, citas comprobadas).
 
 ### PHP básico (00–08)
-- [ ] **00 — ¿Qué es ejecutar un programa?**
-- [ ] **01 — Variables y tipos**
-- [ ] **02 — Condicionales**
-- [ ] **03 — Bucles**
+- [x] **00 — ¿Qué es ejecutar un programa?** — ✅ formulario
+- [x] **01 — Variables y tipos** — ✅ formulario
+- [x] **02 — Condicionales** — ✅ formulario
+- [x] **03 — Bucles** — ✅ formulario
 - [ ] **04 — Funciones**
 - [x] **05 — Arrays** — ✅ formulario (plantilla de referencia)
 - [ ] **06 — Clases y objetos**
