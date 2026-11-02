@@ -13,7 +13,7 @@ final class AsignarControllerTest extends TestCase
 {
     public function test_la_api_asigna_y_devuelve_201(): void
     {
-        $repo = new RepositorioFalso([new Lote('lote-api', 'SOFA', 100, null)]);
+        $repo = new RepositorioFalso([new Lote(['referencia' => 'lote-api', 'sku' => 'SOFA', 'cantidad_comprada' => 100, 'eta' => null])]);
         $controlador = new AsignarController($repo, new SesionFalsa());
         $resp = $controlador->asignar(['id_pedido' => 'o1', 'sku' => 'SOFA', 'cantidad' => 10]);
         $this->assertSame(201, $resp['estado']);
@@ -22,7 +22,7 @@ final class AsignarControllerTest extends TestCase
 
     public function test_la_api_devuelve_400_si_el_sku_no_existe(): void
     {
-        $repo = new RepositorioFalso([new Lote('lote-api', 'SOFA', 100, null)]);
+        $repo = new RepositorioFalso([new Lote(['referencia' => 'lote-api', 'sku' => 'SOFA', 'cantidad_comprada' => 100, 'eta' => null])]);
         $controlador = new AsignarController($repo, new SesionFalsa());
         $resp = $controlador->asignar(['id_pedido' => 'o1', 'sku' => 'INEXISTENTE', 'cantidad' => 10]);
         $this->assertSame(400, $resp['estado']);
