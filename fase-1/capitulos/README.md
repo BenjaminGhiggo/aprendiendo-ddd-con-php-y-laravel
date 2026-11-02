@@ -10,7 +10,7 @@ ejercicios (`ejercicios/`).
 
 | # | Capítulo | Estado |
 |---|----------|:-:|
-| 01 | Domain Modeling | ⬜ |
+| 01 | Domain Modeling | ✅ |
 | 02 | Repository Pattern (Eloquent) | ⬜ |
 | 03 | Coupling and Abstractions | ⬜ |
 | 04 | Service Layer + API (Laravel) | ⬜ |
