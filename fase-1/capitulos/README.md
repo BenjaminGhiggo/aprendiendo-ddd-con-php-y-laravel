@@ -15,8 +15,8 @@ ejercicios (`ejercicios/`).
 | 03 | Coupling and Abstractions | ✅ |
 | 04 | Service Layer + API (Laravel) | ✅ |
 | 05 | TDD in High Gear and Low Gear | ✅ |
-| 06 | Unit of Work | ⬜ |
-| 07 | Aggregates | ⬜ |
+| 06 | Unit of Work | ✅ |
+| 07 | Aggregates | ✅ |
 | 08 | Events and the Message Bus | ⬜ |
 | 09 | Going to Town on the Message Bus | ⬜ |
 | 10 | Commands and Command Handler | ⬜ |
