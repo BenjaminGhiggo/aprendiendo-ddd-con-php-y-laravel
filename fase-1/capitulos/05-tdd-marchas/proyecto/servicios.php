@@ -37,10 +37,11 @@ function skuValido(string $sku, array $lotes): bool
     return false;
 }
 
-// El servicio ARMA el lote desde primitivos (antes lo hacía quien lo llamaba).
-function agregarLote(string $referencia, string $sku, int $cantidad, ?\DateTimeImmutable $eta, RepositorioDeLotes $repo, Sesion $sesion): void
+// El servicio ARMA el lote desde primitivos (antes lo hacía quien lo llamaba). Con Eloquent
+// (Active Record) el Lote se crea con un array de atributos; eta es una fecha ISO (texto) o null.
+function agregarLote(string $referencia, string $sku, int $cantidad, ?string $eta, RepositorioDeLotes $repo, Sesion $sesion): void
 {
-    $repo->agregar(new Lote($referencia, $sku, $cantidad, $eta));
+    $repo->agregar(new Lote(['referencia' => $referencia, 'sku' => $sku, 'cantidad_comprada' => $cantidad, 'eta' => $eta]));
     $sesion->commit();
 }
 
