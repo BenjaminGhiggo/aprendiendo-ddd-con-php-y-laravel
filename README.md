@@ -52,7 +52,7 @@ aprendiendo-ddd-con-php-y-laravel/
 ├── METODOLOGIA.md          ← las reglas del aprendizaje (+ cómo se traduce Python → PHP)
 ├── CLAUDE.md               ← instrucciones para el asistente
 ├── lecciones/              ← FASE 0: 18 lecciones (00–17), cada una un "formulario"
-├── fase-1/capitulos/       ← FASE 1: los 13 capítulos del libro con Laravel (en construcción)
+├── fase-1/capitulos/       ← FASE 1: los 13 capítulos del libro con Laravel
 ├── progreso/               ← checklist de avance (lo marcas tú)
 ├── docs/fuente/            ← el libro: .md citable, .pdf e imágenes
 ├── composer.json           ← dependencias (Composer) y scripts
@@ -73,6 +73,29 @@ vendor/bin/phpunit lecciones/08-modulos-y-phpunit          # tests de una lecci�
 - **PHP 8.3** y **Composer**
 - **PHPUnit 11** para las pruebas
 - **Laravel** + **Eloquent** para la Fase 1
+
+## ⚠️ Nota de diseño: Eloquent es Active Record (honestidad con el libro)
+
+El libro usa **Data Mapper** (SQLAlchemy): el modelo de dominio es una clase **pura** y el ORM la
+mapea por fuera ("el ORM depende del modelo", cap. 2). Este repo usa **Eloquent**, que es
+**Active Record**: en **toda la Fase 1 (caps. 2–13)** el modelo de dominio **hereda de `Model`**
+(`class Lote extends Model`, `class Producto extends Model`) y la lógica de negocio vive **dentro**
+del modelo. Es lo idiomático en Laravel y el estilo elegido para todo el proyecto; **no deja el
+dominio tan puro** como el libro, y esa diferencia se anota en cada capítulo (§3.10). El único
+modelo que **no** hereda de `Model` es el del **cap. 1**, que es PHP puro a propósito (todavía no
+hay base de datos, igual que en el libro).
+
+Dentro de ese estilo Active Record, **cómo se guardan las asignaciones de un lote varía según el
+foco del capítulo**, y ambas formas son Active Record válido:
+
+- **Tabla pivote (`belongsToMany`)** — las asignaciones se **persisten** en la BD. Se usa donde el
+  capítulo trata de persistencia/comandos (p. ej. caps. 2–3 y 10).
+- **Colección en memoria** — las asignaciones (y los lotes del agregado) viven en una propiedad del
+  objeto, **sin** tocar la BD, para poder probar el dominio y el bus de mensajes sin base de datos
+  (p. ej. caps. 4–7 y 11–13).
+
+No es una incoherencia: es una elección por capítulo entre "mostrar la persistencia real" y "probar
+el dominio aislado". El tipo del modelo (`extends Model`) es el mismo en todos.
 
 ## Licencia de la fuente
 El contenido del libro se usa bajo licencia **Creative Commons CC BY-NC-ND**
