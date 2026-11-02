@@ -20,8 +20,8 @@ ejercicios (`ejercicios/`).
 | 08 | Events and the Message Bus | ⬜ |
 | 09 | Going to Town on the Message Bus | ⬜ |
 | 10 | Commands and Command Handler | ⬜ |
-| 11 | Event-Driven Microservices | ⬜ |
-| 12 | CQRS | ⬜ |
-| 13 | Dependency Injection | ⬜ |
+| 11 | Event-Driven Microservices | ✅ |
+| 12 | CQRS | ✅ |
+| 13 | Dependency Injection | ✅ |
 
 El avance detallado por secciones está en [`../../progreso/`](../../progreso/).
