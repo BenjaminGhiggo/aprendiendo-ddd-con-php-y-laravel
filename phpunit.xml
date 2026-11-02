@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         colors="true"
+         cacheDirectory=".phpunit.cache">
+    <!-- Los tests se corren por lección/capítulo pasando la ruta:
+         vendor/bin/phpunit lecciones/08-modulos-y-phpunit
+         Cada archivo *Test.php define su propia clase y hace require del código que prueba. -->
+    <testsuites>
+        <testsuite name="repo">
+            <directory>lecciones</directory>
+            <directory>fase-1</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>

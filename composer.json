@@ -1,0 +1,17 @@
+{
+    "name": "benjaminghiggo/aprendiendo-ddd-con-php-y-laravel",
+    "description": "Aprendizaje guiado desde cero en PHP hasta los patrones de Architecture Patterns with Python (Cosmic Python), con Laravel",
+    "type": "project",
+    "require": {
+        "php": "^8.3"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^11.5"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "scripts": {
+        "test": "phpunit"
+    }
+}
