@@ -13,14 +13,14 @@ final class ServiciosTest extends TestCase
 {
     public function test_asignar_devuelve_la_referencia_del_lote(): void
     {
-        $repo = new RepositorioFalso([new Lote('lote-1', 'LAMPARA', 100, null)]);
+        $repo = new RepositorioFalso([new Lote(['referencia' => 'lote-1', 'sku' => 'LAMPARA', 'cantidad_comprada' => 100, 'eta' => null])]);
         $linea = new LineaPedido('o1', 'LAMPARA', 10);
         $this->assertSame('lote-1', servicioAsignar($linea, $repo, new SesionFalsa()));
     }
 
     public function test_asignar_lanza_error_si_el_sku_no_existe(): void
     {
-        $repo = new RepositorioFalso([new Lote('lote-1', 'LAMPARA', 100, null)]);
+        $repo = new RepositorioFalso([new Lote(['referencia' => 'lote-1', 'sku' => 'LAMPARA', 'cantidad_comprada' => 100, 'eta' => null])]);
         $linea = new LineaPedido('o1', 'INEXISTENTE', 10);
         $this->expectException(SkuInvalido::class);
         servicioAsignar($linea, $repo, new SesionFalsa());
@@ -28,7 +28,7 @@ final class ServiciosTest extends TestCase
 
     public function test_asignar_hace_commit(): void
     {
-        $repo = new RepositorioFalso([new Lote('lote-1', 'LAMPARA', 100, null)]);
+        $repo = new RepositorioFalso([new Lote(['referencia' => 'lote-1', 'sku' => 'LAMPARA', 'cantidad_comprada' => 100, 'eta' => null])]);
         $sesion = new SesionFalsa();
         servicioAsignar(new LineaPedido('o1', 'LAMPARA', 10), $repo, $sesion);
         $this->assertTrue($sesion->comprometida);

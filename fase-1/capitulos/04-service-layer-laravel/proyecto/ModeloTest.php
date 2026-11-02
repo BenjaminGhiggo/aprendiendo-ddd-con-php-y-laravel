@@ -6,26 +6,22 @@ use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . '/modelo.php';
 
-// Las pruebas del dominio (TDD: se escriben primero).
-// Correr:  vendor/bin/phpunit fase-1/capitulos/01-domain-modeling/proyecto
+// Las pruebas del dominio (TDD: se escriben primero). El Lote es un modelo Eloquent, pero como
+// sus asignaciones viven EN MEMORIA, estos tests no necesitan base de datos: creamos el Lote con
+// `new Lote([...])` (constructor de Eloquent) y no lo guardamos.
+// Correr:  vendor/bin/phpunit fase-1/capitulos/04-service-layer-laravel/proyecto
 final class ModeloTest extends TestCase
 {
-    private \DateTimeImmutable $hoy;
-    private \DateTimeImmutable $manana;
-    private \DateTimeImmutable $masTarde;
-
-    protected function setUp(): void
+    private function lote(string $ref, string $sku, int $cantidad, ?string $eta = null): Lote
     {
-        $this->hoy = new \DateTimeImmutable('2025-01-01');
-        $this->manana = new \DateTimeImmutable('2025-01-02');
-        $this->masTarde = new \DateTimeImmutable('2025-01-11');
+        return new Lote(['referencia' => $ref, 'sku' => $sku, 'cantidad_comprada' => $cantidad, 'eta' => $eta]);
     }
 
     /** @return array{Lote, LineaPedido} */
     private function hacerLoteYLinea(string $sku, int $cantidadLote, int $cantidadLinea): array
     {
         return [
-            new Lote('lote-001', $sku, $cantidadLote, $this->hoy),
+            $this->lote('lote-001', $sku, $cantidadLote, '2025-01-01'),
             new LineaPedido('pedido-123', $sku, $cantidadLinea),
         ];
     }
@@ -33,7 +29,7 @@ final class ModeloTest extends TestCase
     // --- Micro-paso 1 ---
     public function test_asignar_a_un_lote_reduce_la_cantidad_disponible(): void
     {
-        $lote = new Lote('lote-001', 'MESA-PEQUEÑA', 20, $this->hoy);
+        $lote = $this->lote('lote-001', 'MESA-PEQUEÑA', 20, '2025-01-01');
         $lote->asignar(new LineaPedido('pedido-ref', 'MESA-PEQUEÑA', 2));
         $this->assertSame(18, $lote->cantidadDisponible());
     }
@@ -48,8 +44,8 @@ final class ModeloTest extends TestCase
 
     public function test_dos_lotes_con_la_misma_referencia_son_el_mismo(): void
     {
-        $a = new Lote('lote-001', 'MESA', 20, null);
-        $b = new Lote('lote-001', 'SILLA', 5, $this->hoy);
+        $a = $this->lote('lote-001', 'MESA', 20, null);
+        $b = $this->lote('lote-001', 'SILLA', 5, '2025-01-01');
         $this->assertTrue($a->equals($b));
     }
 
@@ -74,7 +70,7 @@ final class ModeloTest extends TestCase
 
     public function test_no_puede_asignar_si_los_skus_no_coinciden(): void
     {
-        $lote = new Lote('lote-001', 'SILLA-INCOMODA', 100, null);
+        $lote = $this->lote('lote-001', 'SILLA-INCOMODA', 100, null);
         $linea = new LineaPedido('pedido-123', 'TOSTADORA-CARA', 10);
         $this->assertFalse($lote->puedeAsignar($linea));
     }
@@ -97,8 +93,8 @@ final class ModeloTest extends TestCase
     // --- Micro-paso 4 ---
     public function test_prefiere_lotes_en_stock_a_los_de_envio(): void
     {
-        $enStock = new Lote('lote-en-stock', 'RELOJ-RETRO', 100, null);
-        $deEnvio = new Lote('lote-de-envio', 'RELOJ-RETRO', 100, $this->manana);
+        $enStock = $this->lote('lote-en-stock', 'RELOJ-RETRO', 100, null);
+        $deEnvio = $this->lote('lote-de-envio', 'RELOJ-RETRO', 100, '2025-01-02');
         asignar(new LineaPedido('pedido-ref', 'RELOJ-RETRO', 10), [$enStock, $deEnvio]);
         $this->assertSame(90, $enStock->cantidadDisponible());
         $this->assertSame(100, $deEnvio->cantidadDisponible());
@@ -106,9 +102,9 @@ final class ModeloTest extends TestCase
 
     public function test_prefiere_los_lotes_con_eta_mas_temprana(): void
     {
-        $temprano = new Lote('lote-rapido', 'CUCHARA-MINIMALISTA', 100, $this->hoy);
-        $intermedio = new Lote('lote-normal', 'CUCHARA-MINIMALISTA', 100, $this->manana);
-        $ultimo = new Lote('lote-lento', 'CUCHARA-MINIMALISTA', 100, $this->masTarde);
+        $temprano = $this->lote('lote-rapido', 'CUCHARA-MINIMALISTA', 100, '2025-01-01');
+        $intermedio = $this->lote('lote-normal', 'CUCHARA-MINIMALISTA', 100, '2025-01-02');
+        $ultimo = $this->lote('lote-lento', 'CUCHARA-MINIMALISTA', 100, '2025-01-11');
         asignar(new LineaPedido('pedido-1', 'CUCHARA-MINIMALISTA', 10), [$intermedio, $temprano, $ultimo]);
         $this->assertSame(90, $temprano->cantidadDisponible());
         $this->assertSame(100, $intermedio->cantidadDisponible());
@@ -117,15 +113,15 @@ final class ModeloTest extends TestCase
 
     public function test_devuelve_la_referencia_del_lote_asignado(): void
     {
-        $enStock = new Lote('lote-en-stock-ref', 'POSTER-CULTO', 100, null);
-        $deEnvio = new Lote('lote-de-envio-ref', 'POSTER-CULTO', 100, $this->manana);
+        $enStock = $this->lote('lote-en-stock-ref', 'POSTER-CULTO', 100, null);
+        $deEnvio = $this->lote('lote-de-envio-ref', 'POSTER-CULTO', 100, '2025-01-02');
         $ref = asignar(new LineaPedido('pedido-ref', 'POSTER-CULTO', 10), [$enStock, $deEnvio]);
         $this->assertSame('lote-en-stock-ref', $ref);
     }
 
     public function test_lanza_sin_stock_si_no_se_puede_asignar(): void
     {
-        $lote = new Lote('lote-1', 'TENEDOR-PEQUENO', 10, $this->hoy);
+        $lote = $this->lote('lote-1', 'TENEDOR-PEQUENO', 10, '2025-01-01');
         asignar(new LineaPedido('pedido-1', 'TENEDOR-PEQUENO', 10), [$lote]);
         $this->expectException(SinStock::class);
         asignar(new LineaPedido('pedido-2', 'TENEDOR-PEQUENO', 1), [$lote]);

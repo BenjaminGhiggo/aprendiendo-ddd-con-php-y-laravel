@@ -11,10 +11,12 @@ vendor/bin/phpunit fase-1/capitulos/04-service-layer-laravel/proyecto
 ```
 
 > 🌍 **Traducción (§3.10).** El libro usa **Flask**; aquí **Laravel** (regla 4). El libro usa
-> SQLAlchemy (Data Mapper); nosotros **Eloquent** (Active Record), así que el modelo de dominio
-> sigue siendo PHP puro (`modelo.php`) y unas clases `*Row` de Eloquent guardan en la BD; el
-> `RepositorioEloquent` traduce entre ambos mundos. En una app Laravel típica se suele usar el
-> modelo Eloquent directamente como dominio; aquí separamos para mantener el dominio puro como el libro.
+> SQLAlchemy (Data Mapper), que mantiene el modelo de dominio **puro**. Nosotros usamos
+> **Eloquent** (Active Record), el estilo elegido para todo el proyecto: el `Lote` **hereda de
+> `Model`** y la lógica de dominio vive **dentro** del modelo, así que ya sabe guardarse con
+> `->save()` (el `RepositorioEloquent` se vuelve muy fino). Las asignaciones del Lote se guardan
+> **en memoria** en este capítulo, para que la capa de servicios se pueda probar con el
+> `RepositorioFalso` **sin base de datos**.
 
 ---
 
@@ -71,8 +73,8 @@ El servicio **coordina**; la regla de negocio vive en `asignar()` del dominio.
 ### 6. Árbol de archivos
 ```
 proyecto/
-├── modelo.php          # dominio puro (del cap. 1)
-├── repositorio.php     # interfaz + RepositorioFalso + RepositorioEloquent (+ clases *Row)
+├── modelo.php          # dominio como modelo Eloquent (Lote extends Model; asignaciones en memoria)
+├── repositorio.php     # interfaz + RepositorioFalso + RepositorioEloquent (save()/query())
 ├── servicios.php       # servicioAsignar, SkuInvalido, Sesion/SesionFalsa
 └── ServiciosTest.php   # 3 tests con RepositorioFalso
 ```

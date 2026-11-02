@@ -34,7 +34,7 @@ final class RepositorioEloquentTest extends TestCase
     public function test_guarda_y_obtiene_un_lote(): void
     {
         $repo = new RepositorioEloquent();
-        $repo->agregar(new Lote('lote-100', 'MESA', 20, null));
+        $repo->agregar(new Lote(['referencia' => 'lote-100', 'sku' => 'MESA', 'cantidad_comprada' => 20, 'eta' => null]));
         $cargado = $repo->obtener('lote-100');
         $this->assertNotNull($cargado);
         $this->assertSame('MESA', $cargado->sku);
@@ -44,8 +44,8 @@ final class RepositorioEloquentTest extends TestCase
     public function test_listar_devuelve_los_lotes_guardados(): void
     {
         $repo = new RepositorioEloquent();
-        $repo->agregar(new Lote('lote-1', 'MESA', 10, null));
-        $repo->agregar(new Lote('lote-2', 'SILLA', 5, null));
+        $repo->agregar(new Lote(['referencia' => 'lote-1', 'sku' => 'MESA', 'cantidad_comprada' => 10, 'eta' => null]));
+        $repo->agregar(new Lote(['referencia' => 'lote-2', 'sku' => 'SILLA', 'cantidad_comprada' => 5, 'eta' => null]));
         $this->assertCount(2, $repo->listar());
     }
 }

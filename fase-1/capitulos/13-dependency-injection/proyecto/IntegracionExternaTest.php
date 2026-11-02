@@ -11,7 +11,9 @@ final class IntegracionExternaTest extends TestCase
     private function uowConProducto(int $cantidad = 100): UnidadDeTrabajoFalsa
     {
         $uow = new UnidadDeTrabajoFalsa();
-        $uow->productos()->agregar(new Producto('MESA', [new Lote('l1', 'MESA', $cantidad, null)]));
+        $uow->productos()->agregar(Producto::crear('MESA', [
+            new Lote(['referencia' => 'l1', 'sku' => 'MESA', 'cantidad_comprada' => $cantidad, 'eta' => null]),
+        ]));
         return $uow;
     }
 
@@ -33,6 +35,6 @@ final class IntegracionExternaTest extends TestCase
         Bus::consumirExterno(['referencia' => 'l1', 'cantidad' => 30], $uow);
         // el lote baja a 30; el producto registró Desasignado y el bus reasignó (SinStock interno)
         $lote = $uow->productos()->obtener('MESA')->lotes[0];
-        $this->assertSame(30, $lote->cantidadComprada);
+        $this->assertSame(30, (int) $lote->cantidad_comprada);
     }
 }

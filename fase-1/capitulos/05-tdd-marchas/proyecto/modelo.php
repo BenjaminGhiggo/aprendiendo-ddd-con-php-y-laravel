@@ -8,13 +8,20 @@ declare(strict_types=1);
 //   - Lote (Batch): stock comprado que llega (o ya está) al almacén.
 //   - asignar (allocate): reservar una línea de pedido contra un lote.
 //
-// Este capítulo es PHP PURO: todavía no hay Laravel ni base de datos (eso llega en el cap. 2).
+// ⚠️ DIFERENCIA CON EL LIBRO (§3.10): el libro usa Data Mapper (SQLAlchemy) y mantiene el modelo
+// de dominio PURO ("el ORM depende del modelo"). En este repo usamos Eloquent, que es ACTIVE
+// RECORD: el Lote HEREDA de Model y la lógica de dominio vive DENTRO del modelo. En Laravel el
+// "modelo de dominio" y el "modelo de persistencia" son el MISMO objeto. Es lo idiomático en
+// Laravel (y el estilo elegido para todo el proyecto). Las asignaciones del Lote se guardan EN
+// MEMORIA (propiedad declarada) para que el dominio se pueda probar sin base de datos.
+
+use Illuminate\Database\Eloquent\Model;
 
 // Excepción del negocio (Lección 07): "no hay stock" merece un nombre propio.
 final class SinStock extends \Exception {}
 
-// VALUE OBJECT (Lección 09): se identifica por SUS DATOS. Es inmutable: `readonly` impide
-// cambiar sus campos tras crearlo (como @dataclass(frozen=True) en Python).
+// VALUE OBJECT (Lección 09): se identifica por SUS DATOS. Es inmutable (`readonly`) y NO es un
+// modelo Eloquent: una línea de pedido se compara por valor, no por identidad de fila.
 final class LineaPedido
 {
     public function __construct(
@@ -23,9 +30,8 @@ final class LineaPedido
         public readonly int $cantidad,
     ) {}
 
-    // En Python los frozen dataclass se comparan por valor "gratis". En PHP `==` compara
-    // propiedades y `===` compara identidad de instancia; para un value object escribimos
-    // su propio equals() por valor (metodología §3.10).
+    // En Python los frozen dataclass se comparan por valor "gratis". En PHP escribimos el
+    // equals() por valor a mano (metodología §3.10).
     public function equals(LineaPedido $otra): bool
     {
         return $this->idPedido === $otra->idPedido
@@ -40,21 +46,17 @@ final class LineaPedido
     }
 }
 
-// ENTIDAD (Lección 09): tiene IDENTIDAD (la referencia) y un estado que cambia con el tiempo.
-final class Lote
+// ENTIDAD + modelo Eloquent: tiene IDENTIDAD (la referencia) y un estado que cambia. Columnas de
+// la tabla `lotes`: referencia, sku, cantidad_comprada, eta. No definimos constructor propio: el
+// de Eloquent recibe un array de atributos (`new Lote(['referencia' => ..., ...])`).
+final class Lote extends Model
 {
-    private int $cantidadComprada;   // lo que se compró (no cambia)
-    /** @var array<string, LineaPedido> indexado por clave() para deduplicar por valor */
-    private array $asignaciones = [];
+    protected $table = 'lotes';
+    public $timestamps = false;
+    protected $guarded = [];   // permite asignación masiva (en una app real se usa $fillable)
 
-    public function __construct(
-        public readonly string $referencia,
-        public readonly string $sku,
-        int $cantidad,
-        public readonly ?\DateTimeImmutable $eta,  // null = ya está en almacén
-    ) {
-        $this->cantidadComprada = $cantidad;
-    }
+    /** @var array<string, LineaPedido> asignaciones en memoria (no se persisten en este cap.) */
+    private array $asignaciones = [];
 
     public function asignar(LineaPedido $linea): void
     {
@@ -75,17 +77,12 @@ final class Lote
         foreach ($this->asignaciones as $linea) {
             $asignado += $linea->cantidad;
         }
-        return $this->cantidadComprada - $asignado;
+        return (int) $this->cantidad_comprada - $asignado;
     }
 
     public function puedeAsignar(LineaPedido $linea): bool
     {
         return $this->sku === $linea->sku && $this->cantidadDisponible() >= $linea->cantidad;
-    }
-
-    public function cantidadComprada(): int
-    {
-        return $this->cantidadComprada;
     }
 
     // Igualdad por IDENTIDAD: dos lotes son "el mismo" si comparten referencia.
@@ -106,7 +103,7 @@ function compararLotes(Lote $a, Lote $b): int
     if ($b->eta === null) {
         return 1;
     }
-    return $a->eta <=> $b->eta;   // el operador "nave espacial" compara las fechas
+    return $a->eta <=> $b->eta;   // eta es una fecha ISO (texto): se ordena bien
 }
 
 // SERVICIO DE DOMINIO: NO es un método de ninguna clase; es una función (el libro: "just make

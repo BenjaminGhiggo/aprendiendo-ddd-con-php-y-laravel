@@ -36,8 +36,9 @@ function servicioAsignar(string $idPedido, string $sku, int $cantidad, Repositor
     $linea = new LineaPedido($idPedido, $sku, $cantidad);   // el servicio ARMA la línea
     // ... traer, validar, asignar, confirmar ...
 }
-function agregarLote(string $referencia, string $sku, int $cantidad, ?DateTimeImmutable $eta, RepositorioDeLotes $repo, Sesion $sesion): void {
-    $repo->agregar(new Lote($referencia, $sku, $cantidad, $eta));
+function agregarLote(string $referencia, string $sku, int $cantidad, ?string $eta, RepositorioDeLotes $repo, Sesion $sesion): void {
+    // Eloquent (Active Record): el Lote se crea con un array de atributos (eta = fecha ISO o null).
+    $repo->agregar(new Lote(['referencia' => $referencia, 'sku' => $sku, 'cantidad_comprada' => $cantidad, 'eta' => $eta]));
     $sesion->commit();
 }
 ```

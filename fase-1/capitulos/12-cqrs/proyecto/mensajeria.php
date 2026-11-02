@@ -106,10 +106,15 @@ final class Bus
     {
         $producto = $uow->productos()->obtener($comando->sku);
         if ($producto === null) {
-            $producto = new Producto($comando->sku, []);
+            $producto = Producto::crear($comando->sku, []);
             $uow->productos()->agregar($producto);
         }
-        $producto->lotes[] = new Lote($comando->referencia, $comando->sku, $comando->cantidad, $comando->eta);
+        $producto->agregarLote(new Lote([
+            'referencia' => $comando->referencia,
+            'sku' => $comando->sku,
+            'cantidad_comprada' => $comando->cantidad,
+            'eta' => $comando->eta,
+        ]));
         $uow->comprometer();
     }
 
