@@ -45,11 +45,11 @@ Cada lección en formato **formulario**, marcada ✅ cuando está escrita y **ve
 - [x] **01 — Variables y tipos** — ✅ formulario
 - [x] **02 — Condicionales** — ✅ formulario
 - [x] **03 — Bucles** — ✅ formulario
-- [ ] **04 — Funciones**
+- [x] **04 — Funciones** — ✅ formulario
 - [x] **05 — Arrays** — ✅ formulario (plantilla de referencia)
-- [ ] **06 — Clases y objetos**
-- [ ] **07 — Excepciones**
-- [ ] **08 — Módulos, Composer y primer PHPUnit**
+- [x] **06 — Clases y objetos** — ✅ formulario
+- [x] **07 — Excepciones** — ✅ formulario
+- [x] **08 — Módulos, Composer y primer PHPUnit** — ✅ formulario
 
 ### Programación Orientada a Objetos (POO)
 - [ ] **09 — Encapsulación**
