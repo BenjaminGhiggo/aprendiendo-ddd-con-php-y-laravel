@@ -17,11 +17,13 @@ ejercicios (`ejercicios/`).
 | 05 | TDD in High Gear and Low Gear | ✅ |
 | 06 | Unit of Work | ✅ |
 | 07 | Aggregates | ✅ |
-| 08 | Events and the Message Bus | ⬜ |
-| 09 | Going to Town on the Message Bus | ⬜ |
-| 10 | Commands and Command Handler | ⬜ |
+| 08 | Events and the Message Bus | ✅ |
+| 09 | Going to Town on the Message Bus | ✅ |
+| 10 | Commands and Command Handler | ✅ |
 | 11 | Event-Driven Microservices | ✅ |
 | 12 | CQRS | ✅ |
 | 13 | Dependency Injection | ✅ |
 
 El avance detallado por secciones está en [`../../progreso/`](../../progreso/).
+
+> 🎉 **Los 13 capítulos del libro están completos** (PHP + Laravel + Eloquent).
