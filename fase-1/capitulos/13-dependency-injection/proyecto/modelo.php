@@ -2,16 +2,24 @@
 
 declare(strict_types=1);
 
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
 require_once __DIR__ . '/eventos.php';
 
 // modelo.php — el modelo de dominio (allocation). Glosario: LineaPedido (OrderLine),
 // Lote (Batch), Producto (aggregate), asignar (allocate).
 //
-// En estos capítulos el bus se prueba EN MEMORIA (UoW falsa), así que el dominio es PHP puro
-// (como la versión Python de test_mensajeria). La persistencia con Eloquent se ve en los caps 2, 6 y 7.
+// ⚠️ Eloquent es ACTIVE RECORD (§3.10, estilo elegido para todo el proyecto): Lote y Producto
+// HEREDAN de Model y la lógica de dominio vive DENTRO del modelo. El libro usa Data Mapper
+// (modelo puro). En estos capítulos el bus se prueba EN MEMORIA (UoW falsa): las asignaciones del
+// Lote y los lotes del Producto viven en memoria (como en los caps. 6 y 7), así que el dominio es
+// testeable sin base de datos aunque los modelos sean de Eloquent.
 
 final class SinStock extends \Exception {}
 
+// VALUE OBJECT: inmutable, por valor. No es un modelo Eloquent (se compara por datos, no por fila).
 final class LineaPedido
 {
     public function __construct(
@@ -31,17 +39,16 @@ final class LineaPedido
     }
 }
 
-final class Lote
+// ENTIDAD + modelo Eloquent. Columnas: referencia, sku, cantidad_comprada, eta, producto_sku.
+// Las asignaciones viven EN MEMORIA (propiedad declarada) para probar el bus sin base de datos.
+final class Lote extends Model
 {
-    /** @var array<string, LineaPedido> */
-    private array $asignaciones = [];
+    protected $table = 'lotes';
+    public $timestamps = false;
+    protected $guarded = [];
 
-    public function __construct(
-        public readonly string $referencia,
-        public readonly string $sku,
-        public int $cantidadComprada,
-        public ?\DateTimeImmutable $eta,
-    ) {}
+    /** @var array<string, LineaPedido> asignaciones en memoria */
+    private array $asignaciones = [];
 
     public function asignar(LineaPedido $linea): void
     {
@@ -56,7 +63,7 @@ final class Lote
         foreach ($this->asignaciones as $l) {
             $asignado += $l->cantidad;
         }
-        return $this->cantidadComprada - $asignado;
+        return (int) $this->cantidad_comprada - $asignado;
     }
 
     public function puedeAsignar(LineaPedido $linea): bool
@@ -70,8 +77,7 @@ final class Lote
         if ($this->asignaciones === []) {
             return null;
         }
-        $linea = array_pop($this->asignaciones);
-        return $linea;
+        return array_pop($this->asignaciones);
     }
 }
 
@@ -83,31 +89,55 @@ function compararLotes(Lote $a, Lote $b): int
     if ($b->eta === null) {
         return 1;
     }
-    return $a->eta <=> $b->eta;
+    return $a->eta <=> $b->eta;   // eta es una fecha ISO (texto): se ordena bien
 }
 
-// AGREGADO: frontera de consistencia. Agrupa los lotes de un sku; numeroVersion sube en cada
-// cambio (concurrencia optimista); acumula los eventos de dominio que van ocurriendo.
-final class Producto
+// AGREGADO + modelo Eloquent: frontera de consistencia. Agrupa los lotes de un sku;
+// `numero_version` sube en cada cambio (concurrencia optimista); acumula los eventos de dominio.
+// Como modelo Eloquent tiene clave primaria `sku` (texto) y una relación hasMany a sus lotes;
+// para el dominio sin base de datos usamos `Producto::crear(...)` que fija los lotes en memoria.
+final class Producto extends Model
 {
+    protected $table = 'productos';
+    public $timestamps = false;
+    protected $guarded = [];
+    public $incrementing = false;       // la clave primaria (sku) no es un entero autoincremental
+    protected $keyType = 'string';
+    protected $primaryKey = 'sku';
+
     /** @var Evento[] */
     public array $eventos = [];
 
-    /** @param Lote[] $lotes */
-    public function __construct(
-        public string $sku,
-        public array $lotes,
-        public int $numeroVersion = 0,
-    ) {}
+    public function lotes(): HasMany
+    {
+        return $this->hasMany(Lote::class, 'producto_sku', 'sku');
+    }
+
+    /**
+     * Fábrica: construye un `Producto` con sus lotes en memoria (dominio sin base de datos).
+     * @param Lote[] $lotes
+     */
+    public static function crear(string $sku, array $lotes, int $numeroVersion = 0): Producto
+    {
+        $producto = new Producto(['sku' => $sku, 'numero_version' => $numeroVersion]);
+        $producto->setRelation('lotes', new Collection($lotes));
+        return $producto;
+    }
+
+    public function agregarLote(Lote $lote): void
+    {
+        $lote->producto_sku = $this->sku;
+        $this->lotes->push($lote);   // añade a la colección en memoria del agregado
+    }
 
     public function asignar(LineaPedido $linea): ?string
     {
-        $ordenados = $this->lotes;
+        $ordenados = $this->lotes->all();
         usort($ordenados, 'compararLotes');
         foreach ($ordenados as $lote) {
             if ($lote->puedeAsignar($linea)) {
                 $lote->asignar($linea);
-                $this->numeroVersion += 1;
+                $this->numero_version = (int) $this->numero_version + 1;
                 $this->eventos[] = new Asignado($linea->idPedido, $linea->sku, $linea->cantidad, $lote->referencia);
                 return $lote->referencia;
             }
@@ -120,7 +150,7 @@ final class Producto
     {
         foreach ($this->lotes as $lote) {
             if ($lote->referencia === $referencia) {
-                $lote->cantidadComprada = $cantidadNueva;
+                $lote->cantidad_comprada = $cantidadNueva;
                 while ($lote->cantidadDisponible() < 0) {
                     $linea = $lote->quitarUltimaAsignacion();
                     if ($linea === null) {
