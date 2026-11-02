@@ -1,0 +1,70 @@
+# Fase 0 — PHP desde cero
+
+> No está en el libro: es el cimiento (regla 5) para poder leerlo en PHP.
+> 🏠 [Inicio](../README.md) · 📖 [Cómo estudiar](../COMO-ESTUDIAR.md) · 📚 [Índice de lecciones](../lecciones/README.md)
+
+Dos partes: **Mi avance** (lo marcas tú) y **Material construido** (lo mantiene el asistente).
+
+---
+
+## 1. Mi avance (lo marcas tú)
+
+Al terminar una lección, mira su **semáforo 🚦**. Cambia ⬜ por ✅ en *Estudiada*, anota el color
+y haz commit (`git commit -m "avance: lección NN en verde"`).
+
+| Orden | Lección | Estudiada | Semáforo | Problemas (/12) | Fecha |
+|:-:|---|:-:|:-:|:-:|---|
+| 1 | 00 · ¿Qué es ejecutar un programa? | ⬜ | | | |
+| 2 | 01 · Variables y tipos | ⬜ | | | |
+| 3 | 02 · Condicionales | ⬜ | | | |
+| 4 | 03 · Bucles | ⬜ | | | |
+| 5 | 04 · Funciones | ⬜ | | | |
+| 6 | 05 · Arrays | ⬜ | | | |
+| 7 | 06 · Clases y objetos | ⬜ | | | |
+| 8 | 07 · Excepciones | ⬜ | | | |
+| 9 | 08 · Módulos, Composer y primer PHPUnit | ⬜ | | | |
+| 10 | 09 · Encapsulación | ⬜ | | | |
+| 11 | 10 · Herencia | ⬜ | | | |
+| 12 | 11 · Polimorfismo | ⬜ | | | |
+| 13 | 12 · Abstracción | ⬜ | | | |
+| 14 | 13 · SRP | ⬜ | | | |
+| 15 | 14 · OCP | ⬜ | | | |
+| 16 | 15 · LSP | ⬜ | | | |
+| 17 | 16 · ISP | ⬜ | | | |
+| 18 | 17 · DIP ⭐ | ⬜ | | | |
+
+---
+
+## 2. Material construido (lo mantiene el asistente)
+
+Cada lección en formato **formulario**, marcada ✅ cuando está escrita y **verificada** (todos los
+`.php` corren, PHPUnit verde con la solución, Mermaid válido, citas comprobadas).
+
+### PHP básico (00–08)
+- [ ] **00 — ¿Qué es ejecutar un programa?**
+- [ ] **01 — Variables y tipos**
+- [ ] **02 — Condicionales**
+- [ ] **03 — Bucles**
+- [ ] **04 — Funciones**
+- [x] **05 — Arrays** — ✅ formulario (plantilla de referencia)
+- [ ] **06 — Clases y objetos**
+- [ ] **07 — Excepciones**
+- [ ] **08 — Módulos, Composer y primer PHPUnit**
+
+### Programación Orientada a Objetos (POO)
+- [ ] **09 — Encapsulación**
+- [ ] **10 — Herencia**
+- [ ] **11 — Polimorfismo**
+- [ ] **12 — Abstracción**
+
+### SOLID
+- [ ] **13 — SRP**
+- [ ] **14 — OCP**
+- [ ] **15 — LSP**
+- [ ] **16 — ISP**
+- [ ] **17 — DIP ⭐**
+
+## Bitácora de preguntas (§3.5)
+| Fecha | Lección | La pregunta (W → X) |
+|-------|---------|---------------------|
+|       |         |                     |
