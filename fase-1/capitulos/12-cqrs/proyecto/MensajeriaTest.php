@@ -11,7 +11,9 @@ final class MensajeriaTest extends TestCase
     private function uowConProducto(int $cantidad = 100): UnidadDeTrabajoFalsa
     {
         $uow = new UnidadDeTrabajoFalsa();
-        $uow->productos()->agregar(new Producto('MESA', [new Lote('l1', 'MESA', $cantidad, null)]));
+        $uow->productos()->agregar(Producto::crear('MESA', [
+            new Lote(['referencia' => 'l1', 'sku' => 'MESA', 'cantidad_comprada' => $cantidad, 'eta' => null]),
+        ]));
         return $uow;
     }
 
