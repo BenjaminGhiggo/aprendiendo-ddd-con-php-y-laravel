@@ -9,7 +9,7 @@ Leyenda: ⬜ pendiente · 🟡 en curso · ✅ completa.
 
 | Estado | Archivo |
 |:------:|---------|
-|   🟡   | [Fase 0 — PHP desde cero (18 lecciones)](fase-0-php.md) |
+|   ✅   | [Fase 0 — PHP desde cero (18 lecciones)](fase-0-php.md) |
 
 ## Fase 1 — El libro (Cosmic Python) con Laravel
 

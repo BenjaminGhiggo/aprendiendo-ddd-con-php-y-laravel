@@ -1,5 +1,8 @@
 # Fase 0 — PHP desde cero
 
+> Material: ✅ las 18 lecciones en formato formulario, verificadas con PHP 8.3 (todos los .php
+> corren, PHPUnit verde con la solución, Mermaid válido, citas comprobadas).
+
 > No está en el libro: es el cimiento (regla 5) para poder leerlo en PHP.
 > 🏠 [Inicio](../README.md) · 📖 [Cómo estudiar](../COMO-ESTUDIAR.md) · 📚 [Índice de lecciones](../lecciones/README.md)
 
@@ -58,11 +61,11 @@ Cada lección en formato **formulario**, marcada ✅ cuando está escrita y **ve
 - [x] **12 — Abstracción** — ✅ formulario
 
 ### SOLID
-- [ ] **13 — SRP**
-- [ ] **14 — OCP**
-- [ ] **15 — LSP**
-- [ ] **16 — ISP**
-- [ ] **17 — DIP ⭐**
+- [x] **13 — SRP** — ✅ formulario
+- [x] **14 — OCP** — ✅ formulario
+- [x] **15 — LSP** — ✅ formulario
+- [x] **16 — ISP** — ✅ formulario
+- [x] **17 — DIP ⭐** — ✅ formulario
 
 ## Bitácora de preguntas (§3.5)
 | Fecha | Lección | La pregunta (W → X) |
