@@ -124,9 +124,20 @@ El modelo del cap. 1 no sabe persistirse. Con Eloquent, extenderlo de `Model` le
 erDiagram
     lotes ||--o{ asignaciones : tiene
     lineas_pedido ||--o{ asignaciones : en
-    lotes { string referencia string sku int cantidad_comprada }
-    lineas_pedido { string id_pedido string sku int cantidad }
-    asignaciones { int lote_id int linea_pedido_id }
+    lotes {
+        string referencia
+        string sku
+        int cantidad_comprada
+    }
+    lineas_pedido {
+        string id_pedido
+        string sku
+        int cantidad
+    }
+    asignaciones {
+        int lote_id
+        int linea_pedido_id
+    }
 ```
 La tabla pivote `asignaciones` relaciona lotes y líneas (muchos-a-muchos), como el `set()` del libro.
 
