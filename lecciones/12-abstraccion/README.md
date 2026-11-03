@@ -27,8 +27,9 @@
 
 ## 0. 🧭 La pregunta
 > *"Hoy guardo los lotes en memoria y mañana en una base de datos. Me piden que quien los use
-> **no** tenga que reescribirse. Con duck typing (Lección 11) nadie me avisa si a una versión le
-> falta un método. ¿Cómo escribo un **contrato** que el lenguaje haga cumplir?"*
+> **no** tenga que reescribirse. Si uso una clase base con métodos **vacíos**, una versión puede
+> 'olvidar' implementar uno y nadie avisa. ¿Cómo escribo un **contrato** que el lenguaje **obligue**
+> a cumplir?"*
 
 ## 1. Objetivos (al terminar podrás…)
 1. Definir una `abstract class` con métodos `abstract` (huecos obligatorios).
@@ -57,8 +58,8 @@ contrato se hace cumplir solo.
 
 ## 3. El dolor
 ```php
-// Con duck typing (Lección 11) usábamos interfaces; pero si una clase base tiene métodos VACÍOS,
-// la hija puede "olvidar" implementarlos y nadie avisa:
+// En la Lección 11 una interface obligaba a implementar sus métodos; pero si una clase base tiene
+// métodos VACÍOS (no abstractos), la hija puede "olvidar" sobrescribirlos y nadie avisa:
 class RepositorioBase {
     public function agregar(string $ref): void {}       // vacío
     public function obtener(int $i): string { return ""; }
@@ -127,7 +128,7 @@ Necesitamos que el lenguaje **obligue** a implementar el contrato.
 ## 8. ⚠️ Errores frecuentes
 | # | ❌ Así no | Qué pasa | ✅ Así sí |
 |---|---|---|---|
-| A3 | `new RepositorioAbstracto()` | `Error: Cannot instantiate abstract class RepositorioAbstracto` | instancia una clase **concreta** que la extienda |
+| E1 | `new RepositorioAbstracto()` | `Error: Cannot instantiate abstract class RepositorioAbstracto` | instancia una clase **concreta** que la extienda |
 | E2 | `class X extends Repo {}` sin implementar `agregar` | `Fatal error: Class X contains 1 abstract method and must … implement the remaining methods` | implementa todos los métodos abstractos |
 | E3 | Clase base con métodos **vacíos** en vez de abstractos | la hija puede olvidarlos y nadie avisa | usa `abstract` para que PHP obligue |
 

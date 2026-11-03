@@ -47,7 +47,10 @@
 **Equivalente en PHP** (§3.10): el núcleo recibe la regla/clase; lo nuevo se **agrega**.
 ```php
 $descuentos["vip"] = fn(float $p) => $p * 0.7;   // caso nuevo = entrada nueva, sin tocar el núcleo
-function precioConCodigo(float $precio, string $codigo): float { return ($descuentos[$codigo])($precio); }
+// el núcleo recibe el mapa como parámetro (en PHP una función NO ve las variables de fuera):
+function precioConCodigo(array $descuentos, string $codigo, float $precio): float {
+    return ($descuentos[$codigo])($precio);
+}
 ```
 **Por qué importa:** el *message bus* del cap. 8 es OCP puro. `handle()` **nunca cambia**: para
 reaccionar a un evento nuevo solo se **agrega una entrada** al diccionario `HANDLERS`.

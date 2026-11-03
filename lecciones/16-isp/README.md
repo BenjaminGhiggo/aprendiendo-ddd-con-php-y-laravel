@@ -127,7 +127,7 @@ puede llevarse una excepción inesperada. Además, si cambia la firma de `fax`, 
 | **P2** | Los **falsos** para tests son pequeños y fáciles de escribir. |
 | **P3** | Baja el **acoplamiento**: cambiar un rol no toca a los clientes de otro. |
 | **P4** | Una clase puede **implementar varias** interfaces pequeñas a la vez (`implements A, B`). |
-| **P5** | La `interface` **documenta** el rol y el compilador (`tsc` de PHP, el motor) avisa si falta un método. |
+| **P5** | La `interface` **documenta** el rol y PHP lanza un `Fatal error` si una clase que la `implements` olvida un método. |
 | **P6** | El ISP previene violaciones del **LSP**: sin métodos "que no aplican", no hay excepciones sorpresa. |
 
 ## 8. ⚠️ Errores frecuentes

@@ -156,8 +156,10 @@ final class Bus
     public static function agregarAsignacionAVista(Asignado $evento, UnidadDeTrabajo $uow): void
     {
         // CQRS: actualizar el modelo de LECTURA cuando se asigna. Un INSERT simple; el GET luego
-        // solo hace un SELECT. (Nota de diseño: si la tabla no existe -p. ej. con la UoW falsa sin
-        // base de datos- este handler falla, pero el bus AÍSLA los eventos, así que no rompe el comando.)
+        // solo hace un SELECT. Escribe con la conexión GLOBAL de Eloquent (no con $uow), así que
+        // funciona con la UoW falsa siempre que Capsule esté arrancado y la tabla creada. Si la BD
+        // no estuviera montada, este handler fallaría, pero el bus AÍSLA los eventos (try/catch,
+        // cap. 10), así que no rompería el comando.
         Capsule::table('asignaciones_vista')->insert([
             'id_pedido' => $evento->idPedido,
             'sku' => $evento->sku,

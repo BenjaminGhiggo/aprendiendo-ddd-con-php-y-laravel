@@ -162,12 +162,17 @@ vendor/bin/phpunit fase-1/capitulos/12-cqrs/proyecto   # OK (10 tests)
 ---
 
 > 🛠️ **Nota de diseño (para que no te confunda al estudiar):** el handler que llena el modelo de
-> lectura (`agregarAsignacionAVista`) usa `Capsule::table(...)`. En los tests con la **UoW falsa**
-> (en memoria, sin base de datos) ese handler **falla y el bus lo ignora en silencio** — es a
-> propósito: los handlers de evento están aislados con `try/catch` (cap. 10). Por eso el modelo de
-> lectura **solo se llena de verdad** cuando hay base de datos real, que es como lo prueba
-> [`proyecto/VistasTest.php`](proyecto/VistasTest.php) (arranca Capsule y crea la tabla). No es un
-> bug: es la propiedad de "si falla el read model, la asignación sigue funcionando".
+> lectura (`agregarAsignacionAVista`) escribe con `Capsule::table(...)`, es decir, con la **conexión
+> global** de Eloquent, **no** a través de la UoW. Por eso la vista **se llena aunque uses la UoW
+> falsa**, siempre que Capsule esté arrancado y la tabla creada — que es justo lo que hace el
+> `setUp` de [`proyecto/VistasTest.php`](proyecto/VistasTest.php) (por eso ese test pasa con la UoW
+> falsa). Lo que decide si la vista se llena no es el tipo de UoW, sino si la base de datos está
+> montada.
+>
+> 🌍 **Traducción (§3.10):** en el libro (Python) este handler usa `uow.session`, así que con la UoW
+> falsa (sin `.session`) no escribe; en PHP lo desacoplamos de la UoW usando la conexión global de
+> Eloquent. En ambos casos los handlers de evento están **aislados** con `try/catch` (cap. 10): si
+> el read model falla, la asignación **no** se rompe.
 
 ⬅️ [Capítulo 11 · Microservicios](../11-microservicios-eventos/) · 🏠 [Índice de capítulos](../README.md) · ➡️ [Capítulo 13 · Dependency Injection](../13-dependency-injection/)
 

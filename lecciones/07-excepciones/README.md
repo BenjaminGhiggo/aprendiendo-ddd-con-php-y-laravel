@@ -167,7 +167,7 @@ try {
 ```php
 class SinStock extends \Exception {}
 function asignarLinea(int $cantidad, int $disponible): int {
-    if ($cantidad > $disponible) { throw new SinStock("sin stock"); }  // no lo atrapa aquí
+    if ($cantidad > $disponible) { throw new SinStock("sin stock para $cantidad"); }  // no lo atrapa aquí
     return $disponible - $cantidad;
 }
 function procesarPedido(int $cantidad, int $disponible): void {

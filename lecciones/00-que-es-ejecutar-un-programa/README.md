@@ -170,7 +170,7 @@ echo "Y esto también\n";
 9. Muestra el resultado de `2 + 3 * 4` y observa el orden de las operaciones.
 10. Muestra una "factura": `Mesa: 100`, `Silla: 50` y `Total: ` con la **suma** `100 + 50`.
 11. Muestra cuántos segundos hay en una hora (`60 * 60`).
-12. *(Puente al libro)* Guarda `$sku = "MESA";` y muestra `Out of stock for MESA` (como la f-string del cap. 8).
+12. *(Puente al libro)* Muestra el mensaje de "sin stock" del libro: `Out of stock for MESA` (solo con `echo` y el texto tal cual; las variables llegan en la Lección 01).
 
 ## 11. 🔑 Claves (respuestas)
 <details><summary>Ver claves (solo después de intentarlo)</summary>
@@ -188,7 +188,7 @@ echo "Y esto también\n";
 | 9 | `14` (primero `*`, luego `+`) | P6 |
 | 10 | `Mesa: 100` / `Silla: 50` / `Total: 150` | P6 |
 | 11 | `3600` | P6 |
-| 12 | `Out of stock for MESA` | interpolación (Lección 01) |
+| 12 | `Out of stock for MESA` | P1 (`echo` con el texto tal cual) |
 
 Código completo en [`paso5-solucionario/`](paso5-solucionario/).
 </details>

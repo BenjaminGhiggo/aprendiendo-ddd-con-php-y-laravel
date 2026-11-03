@@ -129,10 +129,12 @@ Sin una variable, el dato "Ada" está repartido por todo el programa.
 |---|---|---|---|
 | E1 | `nombre = "Ada";` (sin `$`) | `Parse error` | `$nombre = "Ada";` |
 | E2 | `'Hola $nombre'` (comillas simples) | sale literal `Hola $nombre` (no interpola) | `"Hola $nombre"` (comillas dobles) |
-| E3 | `"hola" + 3` (con `strict_types`) | `TypeError: Unsupported operand types: string + int` | une textos con `.`: `"hola" . 3` |
+| E3 | `"hola" + 3` (sumar texto con número) | `TypeError: Unsupported operand types: string + int` | une textos con `.`: `"hola" . 3` |
 | E4 | `echo $noExiste;` | `Warning: Undefined variable $noExiste` (sale vacío) | crea la variable antes de usarla |
 
-> 🔬 Mensajes reales de PHP 8.3. El `TypeError` de E3 ocurre con `declare(strict_types=1)`.
+> 🔬 Mensajes reales de PHP 8.3. En PHP 8, `"hola" + 3` lanza `TypeError` **siempre** (con o sin
+> `declare(strict_types=1)`): el `+` es solo para números. `strict_types` afecta a los **argumentos
+> y retornos de funciones**, no a los operadores. Para unir textos se usa el punto: `"hola" . 3`.
 
 ---
 
@@ -202,7 +204,7 @@ echo "Out of stock for $eventoSku\n";   // interpolación = la f-string del cap.
 | 4 | `13` |
 | 5 | `18` |
 | 6 | `3.5` |
-| 7 | `3 resto 1` |
+| 7 | `3` y `1` |
 | 8 | `Ada42` |
 | 9 | `256` |
 | 10 | `5 + 3 = 8` |
