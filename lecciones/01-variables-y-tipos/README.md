@@ -117,20 +117,22 @@ Sin una variable, el dato "Ada" está repartido por todo el programa.
 > 💡 Todas están ejecutables en [`paso1-formulas.php`](paso1-formulas.php).
 
 ## 7. 📐 Propiedades
-| # | Propiedad |
+| Variables | Tipos y operaciones |
 |---|---|
-| **P1.** Toda variable empieza con `$` (`$nombre`, no `nombre`). |
-| **P2.** Una variable se puede cambiar cuantas veces quieras. |
-| **P3.** La interpolación `"$x"` solo funciona con **comillas dobles** (`"`), no simples (`'`). |
-| **P4.** `7 / 2` da `3.5` (float); para la división entera usa `intdiv(7, 2)`. |
+| **P1.** `=` significa **"guarda en"**: primero se calcula la derecha y luego se guarda a la izquierda. | **P5.** La interpolación `"$x"` solo funciona con **comillas dobles** (`"`), no simples (`'`). |
+| **P2.** Toda variable empieza con `$` y guarda **solo el último** valor que le asignaste. | **P6.** `+` **solo** suma números; para **unir textos** se usa el punto `.` (`"a" . "b"` → `ab`). |
+| **P3.** Los nombres de variable **distinguen mayúsculas**: `$nombre` y `$Nombre` son variables distintas. | **P7.** `7 / 2` da `3.5` (float); para la división entera, `intdiv(7, 2)` → `3`. Orden: `*` `/` `%` antes que `+` `-`; los **paréntesis** van primero (`2 + 3 * 4` → `14`). |
+| **P4.** Hay que **crear** la variable **antes** de usarla; si no, `Warning: Undefined variable`. | **P8.** El **tipo** depende del **valor**, no del nombre: `25` es `int`, `"25"` es `string`. `gettype()` lo dice. |
 
 ## 8. ⚠️ Errores frecuentes
 | # | ❌ Así no | Qué pasa | ✅ Así sí |
 |---|---|---|---|
-| E1 | `nombre = "Ada";` (sin `$`) | `Parse error` | `$nombre = "Ada";` |
+| E1 | `nombre = "Ada";` (sin `$`) | `Parse error: syntax error, unexpected token "="` | `$nombre = "Ada";` |
 | E2 | `'Hola $nombre'` (comillas simples) | sale literal `Hola $nombre` (no interpola) | `"Hola $nombre"` (comillas dobles) |
-| E3 | `"hola" + 3` (sumar texto con número) | `TypeError: Unsupported operand types: string + int` | une textos con `.`: `"hola" . 3` |
-| E4 | `echo $noExiste;` | `Warning: Undefined variable $noExiste` (sale vacío) | crea la variable antes de usarla |
+| E3 | `"hola" + 3` (sumar texto con número) | `Fatal error: Uncaught TypeError: Unsupported operand types: string + int` | une textos con `.`: `"hola" . 3` |
+| E4 | `echo $noExiste;` (nunca lo creaste) | `Warning: Undefined variable $noExiste` (sale vacío) | crea la variable antes de usarla |
+| E5 | `echo Hola;` (texto sin comillas) | `Fatal error: Uncaught Error: Undefined constant "Hola"` | con comillas: `echo "Hola";` |
+| E6 | `$2nombre = 1;` (empieza con número) | `Parse error: syntax error, unexpected integer "2", expecting variable or "{" or "$"` | no empieces con número: `$nombre2 = 1;` |
 
 > 🔬 Mensajes reales de PHP 8.3. En PHP 8, `"hola" + 3` lanza `TypeError` **siempre** (con o sin
 > `declare(strict_types=1)`): el `+` es solo para números. `strict_types` afecta a los **argumentos
@@ -142,32 +144,81 @@ Sin una variable, el dato "Ada" está repartido por todo el programa.
 > Todos están en [`paso2-ejemplos-resueltos.php`](paso2-ejemplos-resueltos.php).
 
 **Ejemplo 1 — Saludar con un nombre variable** *(fácil)*
+> Enunciado: saluda a un cliente; luego cambia de cliente editando **una** sola línea.
 ```php
-$nombre = "Ada";          // Paso 1: guardar el dato
-echo "Hola, $nombre\n";   // Paso 2: interpolar  -> Hola, Ada
-$nombre = "Grace";        // Paso 3: cambiar el dato...
-echo "Hola, $nombre\n";   // Paso 4: ...y el mensaje cambia solo -> Hola, Grace
+$nombre = "Ada";          // Paso 1: guardar el dato en una variable
+echo "Hola, $nombre\n";   // Paso 2: interpolar dentro de comillas dobles (P5) -> Hola, Ada
+$nombre = "Grace";        // Paso 3: reasignar en UN solo lugar (P2)
+echo "Hola, $nombre\n";   // Paso 4: todo lo que la usa cambia solo -> Hola, Grace
+```
+Salida:
+```
+Hola, Ada
+Hola, Grace
 ```
 
 **Ejemplo 2 — El total de una compra** *(fácil)*
+> Enunciado: una mesa cuesta 100 y se compran 3. Calcula el total.
 ```php
-$precio = 100;
+$precio = 100;                   // Paso 1: datos en variables
 $cantidad = 3;
-$total = $precio * $cantidad;   // una cuenta guardada en otra variable
-echo "Total: $total\n";          // -> 300
+$total = $precio * $cantidad;    // Paso 2: guardar el resultado de una cuenta (P1)
+echo "Total: $total\n";          // -> Total: 300
+```
+Salida:
+```
+Total: 300
 ```
 
-**Ejemplo 3 — Comprobar un tipo** *(intermedio)*
+**Ejemplo 3 — Unir texto y número** *(intermedio)*
+> Enunciado: muestra `Tienes 25 años` a partir de la variable `$edad = 25`.
 ```php
-$qty = 20;                                   // como el qty=20 del libro
-echo gettype($qty) . "\n";                   // -> integer
-echo gettype("SMALL-TABLE") . "\n";          // -> string
+$edad = 25;                              // Paso 1: $edad es un int (P8)
+echo gettype($edad) . "\n";              // -> integer
+$texto = "Tienes " . $edad . " años";    // Paso 2: el punto (.) une texto y número (P6)
+echo $texto . "\n";                      // -> Tienes 25 años
+echo "Tienes $edad años\n";              // Paso 3: lo mismo, interpolando (P5)
+```
+Con `+` en lugar de `.`, el Paso 2 daría el error E3 (`TypeError`): en PHP el `+` es solo para números.
+Salida:
+```
+integer
+Tienes 25 años
+Tienes 25 años
 ```
 
-**Ejemplo 4 — Un mensaje como el del libro** *(avanzado)*
+**Ejemplo 4 — Stock disponible de un lote, como en el libro** *(avanzado)*
+> Enunciado: un lote compró 20 unidades. Llegan dos líneas de pedido, de 2 y de 5.
+> ¿Cuánto queda disponible después de cada una?
 ```php
-$eventoSku = "SMALL-TABLE";
-echo "Out of stock for $eventoSku\n";   // interpolación = la f-string del cap. 8
+$comprado = 20;                          // Paso 1: el lote compró 20 unidades
+$asignado = 0;                           // Paso 2: todavía no se asignó nada
+$asignado = $asignado + 2;               // Paso 3: llega una línea de pedido de 2 (P1)
+$disponible = $comprado - $asignado;     // Paso 4: disponible = comprado - asignado
+echo "Disponible: $disponible\n";        // -> 18 (lo que espera el test del libro)
+$asignado = $asignado + 5;               // Paso 5: llega otra línea de 5
+$disponible = $comprado - $asignado;     // Paso 6: hay que RECALCULAR
+echo "Disponible: $disponible\n";        // -> 13
+echo "Out of stock for SMALL-TABLE\n";   // puente: la misma interpolación es la f-string del cap. 8
+```
+Traza (lo que vale cada variable **después** de cada paso):
+
+| paso | `$comprado` | `$asignado` | `$disponible` |
+|---|---|---|---|
+| 1 | `20` | — | — |
+| 2 | `20` | `0` | — |
+| 3 | `20` | `2` | — |
+| 4 | `20` | `2` | `18` |
+| 5 | `20` | `7` | `18` ← ¡todavía el valor viejo! |
+| 6 | `20` | `7` | `13` |
+
+Fíjate en el paso 5: `$disponible` **no** se actualiza solo. Una variable guarda un valor, no una
+fórmula (P2): si cambian los datos, hay que **volver a calcular**.
+Salida:
+```
+Disponible: 18
+Disponible: 13
+Out of stock for SMALL-TABLE
 ```
 
 ---

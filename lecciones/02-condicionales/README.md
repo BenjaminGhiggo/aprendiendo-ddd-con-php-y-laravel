@@ -116,22 +116,25 @@ Sin condicionales, el programa no puede reaccionar a los datos: hace siempre lo 
 > 💡 Todas están ejecutables en [`paso1-formulas.php`](paso1-formulas.php).
 
 ## 7. 📐 Propiedades
-| # | Propiedad |
+| Comparaciones | Condicionales |
 |---|---|
-| **P1.** Una comparación siempre da `true` o `false`. |
-| **P2.** En `if/elseif/else` gana el **primer** bloque cuya condición se cumple; el resto se ignora. |
-| **P3.** El orden de los `elseif` importa: del caso más específico al más general. |
-| **P4.** `&&` solo es `true` si **ambas** condiciones lo son; `||` si **al menos una** lo es. |
+| **P1.** Toda comparación da **siempre** `true` o `false`. | **P5.** En `if/elseif/else` gana el **primer** bloque cuya condición se cumple; el resto se ignora. |
+| **P2.** `=` **guarda**, `==` **compara**, `===` compara **valor y tipo**. Confundirlos es el error más común. | **P6.** El **orden** de los `elseif` importa: del caso más específico al más general. |
+| **P3.** `==` convierte tipos (`5 == "5"` → `true`); `===` **no** (`5 === "5"` → `false`). Usa `===` para comparar seguro. | **P7.** `else` **no** lleva condición y es **opcional**; `elseif` puede repetirse cuantas veces quieras. |
+| **P4.** `&&` solo es `true` si **ambas** condiciones lo son; `||`, si **al menos una** lo es. | **P8.** `match` compara con `===` (estricto) y **exige** cubrir todos los casos: sin `default`, un valor no listado da `UnhandledMatchError`. |
 
 ## 8. ⚠️ Errores frecuentes
 | # | ❌ Así no | Qué pasa | ✅ Así sí |
 |---|---|---|---|
-| E1 | `if ($x = 5) { }` | un solo `=` **asigna** (no compara); la condición es casi siempre "verdadera" | `if ($x === 5) { }` |
+| E1 | `if ($x = 5) { }` | **sin error, pero mal:** un solo `=` **asigna** (no compara), así que la condición es casi siempre "verdadera" | compara con `===`: `if ($x === 5) { }` |
 | E2 | `if (5 == "5")` | `true` (convierte tipos: puede engañar) | `if (5 === "5")` → `false` (seguro) |
-| E3 | `elseif` en el orden equivocado (general primero) | nunca se llega al caso específico | pon lo específico primero |
-| E4 | `match($x) { 1 => "uno" }` con `$x = 9` | `UnhandledMatchError: Unhandled match case 9` | añade `default => ...` |
+| E3 | `elseif` en el orden equivocado (el general primero) | **sin error, pero mal:** nunca se llega al caso específico | pon lo **específico** primero |
+| E4 | `match($x) { 1 => "uno" }` con `$x = 9` | `Fatal error: Uncaught UnhandledMatchError: Unhandled match case 9` | añade `default => ...` |
+| E5 | `if $x > 0 { }` (sin paréntesis) | `Parse error: syntax error, unexpected variable "$x", expecting "("` | la condición va entre paréntesis: `if ($x > 0) { }` |
+| E6 | `else ($x < 0) { }` (un `else` con condición) | `Parse error: syntax error, unexpected token "echo"` (o el token que siga) | si necesitas condición, usa `elseif ($x < 0) { }` |
 
-> 🔬 Mensajes reales de PHP 8.3.
+> 🔬 Mensajes reales de PHP 8.3. **E1 y E3 son los más peligrosos:** el programa **funciona** pero
+> da la respuesta equivocada, sin ningún mensaje.
 
 ---
 
@@ -139,36 +142,91 @@ Sin condicionales, el programa no puede reaccionar a los datos: hace siempre lo 
 > Todos están en [`paso2-ejemplos-resueltos.php`](paso2-ejemplos-resueltos.php).
 
 **Ejemplo 1 — Mayor de edad** *(fácil)*
+> Enunciado: con `$edad = 20`, muestra si la persona puede pasar o no.
 ```php
 $edad = 20;                  // Paso 1: el dato
-if ($edad >= 18) {           // Paso 2: la comparación
-    echo "Puede pasar\n";    // Paso 3: qué hacer si es verdadera
+if ($edad >= 18) {           // Paso 2: la comparación da true o false (P1)
+    echo "Puede pasar\n";    // Paso 3: este bloque corre si es true
 } else {
-    echo "No puede pasar\n";
+    echo "No puede pasar\n"; //         este, si es false
 }
+```
+`20 >= 18` es `true`, así que se muestra `Puede pasar` y el `else` se salta.
+Salida:
+```
+Puede pasar
 ```
 
 **Ejemplo 2 — Clasificar una nota** *(intermedio)*
+> Enunciado: de 18 en adelante, `excelente`; de 11 a 17, `aprobado`; si no, `desaprobado`.
 ```php
-$nota = 15;
-if ($nota >= 18) { echo "excelente\n"; }      // gana el PRIMERO que cumple
-elseif ($nota >= 11) { echo "aprobado\n"; }
-else { echo "desaprobado\n"; }
+$nota = 14;                            // Paso 1: el dato
+if ($nota >= 18) {                     // Paso 2: ¿14 >= 18? false -> se salta
+    echo "excelente\n";
+} elseif ($nota >= 11) {               // Paso 3: ¿14 >= 11? true -> entra aquí
+    echo "aprobado\n";
+} else {                               // Paso 4: ya entró en uno: el else se salta
+    echo "desaprobado\n";
+}
+```
+Traza (qué camino toma con distintas notas):
+
+| `$nota` | ¿`>= 18`? | ¿`>= 11`? | camino | se muestra |
+|---|---|---|---|---|
+| `19` | `true` | *(no se pregunta)* | `if` | `excelente` |
+| `14` | `false` | `true` | `elseif` | `aprobado` |
+| `11` | `false` | `true` | `elseif` | `aprobado` |
+| `7` | `false` | `false` | `else` | `desaprobado` |
+
+Fíjate en la fila del 19: como el `if` ya fue `true`, PHP **ni siquiera pregunta** el `elseif` (P5).
+Por eso el **orden importa** (E3).
+Salida (con `$nota = 14`):
+```
+aprobado
 ```
 
 **Ejemplo 3 — Devolver un booleano** *(intermedio)*
+> Enunciado: guarda en una variable si alguien es mayor de edad, sin `if`.
 ```php
-$edad = 15;
-$esMayor = $edad >= 18;      // la comparación YA es true/false
-var_export($esMayor);        // -> false
+$edad = 15;                  // Paso 1: el dato
+$esMayor = $edad >= 18;      // Paso 2: la comparación YA es true/false (P1)
+var_export($esMayor);        // Paso 3: ver el booleano -> false
+echo "\n";
+```
+La comparación por sí sola ya devuelve `true`/`false`: no hace falta un `if` para obtener el booleano.
+Salida:
+```
+false
 ```
 
 **Ejemplo 4 — La regla del libro (`puede_asignar`)** *(avanzado)*
+> Enunciado: un lote de `RELOJ` tiene 100 disponibles. Llega una línea de 10 `RELOJ`.
+> Se puede asignar si el SKU coincide **y** alcanza la cantidad.
 ```php
 // return self.sku == line.sku and self.available_quantity >= line.qty  (Cap. 1)
-$loteSku = "RELOJ"; $lineaSku = "RELOJ"; $disponible = 100; $cantidad = 10;
-$puede = $loteSku === $lineaSku && $disponible >= $cantidad;   // dos comparaciones con &&
-var_export($puede);          // -> true
+$loteSku = "RELOJ";                      // Paso 1: datos del lote
+$disponible = 100;
+$lineaSku = "RELOJ";                     // Paso 2: datos de la línea de pedido
+$cantidad = 10;
+$mismoSku = $loteSku === $lineaSku;      // Paso 3: primera regla -> true (P3)
+$alcanza = $disponible >= $cantidad;     // Paso 4: segunda regla -> true (P1)
+$puede = $mismoSku && $alcanza;          // Paso 5: el && une las DOS (P4)
+var_export($puede);                      // -> true
+echo "\n";
+```
+Traza de las dos reglas:
+
+| # | comparación | resultado |
+|---|---|---|
+| 3 | `"RELOJ" === "RELOJ"` | `true` |
+| 4 | `100 >= 10` | `true` |
+| 5 | `true && true` | `true` |
+
+Es la misma idea que `return self.sku == line.sku and self.available_quantity >= line.qty` del libro:
+primero se calculan las dos comparaciones y luego el `&&` las une.
+Salida:
+```
+true
 ```
 
 ---

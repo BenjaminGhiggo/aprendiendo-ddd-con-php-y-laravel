@@ -100,22 +100,25 @@ archivo que ejecutar, no hay forma de que "muestre algo por ti".
 > 💡 Todas están ejecutables en [`paso1-formulas.php`](paso1-formulas.php).
 
 ## 7. 📐 Propiedades
-| # | Propiedad |
+| Sobre el programa | Sobre `echo` y el texto |
 |---|---|
-| **P1.** Todo archivo PHP empieza con `<?php`. |
-| **P2.** Cada instrucción termina en `;`. Si falta, PHP da un `Parse error`. |
-| **P3.** El programa se ejecuta **de arriba abajo**, en orden. |
-| **P4.** PHP **no** usa la sangría (los espacios al inicio) para nada: es solo para que tú leas mejor. |
+| **P1.** Todo archivo PHP empieza con la etiqueta `<?php`. Sin ella, el texto sale **tal cual**, sin ejecutarse. | **P5.** El **texto** va entre comillas; sin comillas PHP cree que es una **constante** y da `Undefined constant`. |
+| **P2.** Cada instrucción termina en `;`. Si falta, PHP da un `Parse error` y **no** ejecuta nada. | **P6.** Los **números** van **sin** comillas: `42` es un número, `"42"` es texto. |
+| **P3.** El programa se ejecuta **de arriba abajo**, una instrucción tras otra. | **P7.** `echo` **no** pone espacios ni saltos entre valores: `echo "a", "b";` → `ab`. El espacio o el `\n` lo pones **tú**. |
+| **P4.** PHP **no** usa la sangría (los espacios al inicio) para nada: es solo para que tú leas mejor. | **P8.** Los nombres de **función** **no** distinguen mayúsculas (`echo`, `ECHO`, `Echo` funcionan igual), pero las **variables sí**: `$x` y `$X` son distintas. |
 
 ## 8. ⚠️ Errores frecuentes
 | # | ❌ Así no | Qué pasa | ✅ Así sí |
 |---|---|---|---|
-| E1 | `echo "a"` (sin `;`) y otra línea | `Parse error: syntax error, unexpected token ... expecting ";"` | pon `;` al final: `echo "a";` |
-| E2 | `echo "Hola` (sin cerrar la comilla) | `Parse error: syntax error, unexpected end of file` | cierra la comilla: `echo "Hola";` |
+| E1 | `echo "a"` (sin `;`) y otra línea `echo "b";` | `Parse error: syntax error, unexpected token "echo", expecting "," or ";"` | pon `;` al final: `echo "a";` |
+| E2 | `echo "Hola;` (sin cerrar la comilla) | `Parse error: syntax error, unexpected end of file, expecting variable or "${" or "{$"` | cierra la comilla: `echo "Hola";` |
 | E3 | `echo $x;` (nunca creaste `$x`) | `Warning: Undefined variable $x` (muestra vacío) | crea la variable antes (Lección 01) |
 | E4 | `saludar();` (función que no existe) | `Fatal error: Uncaught Error: Call to undefined function saludar()` | define la función antes (Lección 04) |
+| E5 | `echo "Hola";` **sin** `<?php` arriba | **sin error, pero mal:** PHP no ejecuta nada y escribe el texto literal `echo "Hola";` | empieza el archivo con `<?php` |
+| E6 | `echo "a" "b";` (dos textos sin coma) | `Parse error: syntax error, unexpected double-quoted string "b", expecting "," or ";"` | separa con coma: `echo "a", "b";` |
 
-> 🔬 Los mensajes son reales de PHP 8.3.
+> 🔬 Mensajes reales de PHP 8.3. **E5 es el más traicionero:** no hay mensaje de error, pero la
+> salida es el código mismo, no su resultado.
 
 ---
 
@@ -123,29 +126,71 @@ archivo que ejecutar, no hay forma de que "muestre algo por ti".
 > Todos están en [`paso2-ejemplos-resueltos.php`](paso2-ejemplos-resueltos.php).
 
 **Ejemplo 1 — Saludar** *(fácil)*
+> Enunciado: muestra `Hola, mundo` en su propia línea.
 ```php
-echo "Hola, mundo\n";   // un echo, su texto, y un salto de línea
+echo "Hola, mundo\n";   // Paso 1: un echo, su texto entre comillas y un salto de línea (P1 §6 + P5)
 ```
+Salida:
+```
+Hola, mundo
+```
+Paso 2: guarda el archivo. Paso 3: en la terminal, `php <ruta-del-archivo>` → se ve `Hola, mundo`.
 
 **Ejemplo 2 — Varias líneas** *(fácil)*
+> Enunciado: muestra `Línea uno` y debajo `Línea dos`.
 ```php
-echo "Línea uno\n";
-echo "Línea dos\n";
+echo "Línea uno\n";   // Paso 1: primer echo; el \n baja a la línea siguiente (P5 §6)
+echo "Línea dos\n";   // Paso 2: va DESPUÉS porque está abajo (P3)
 ```
+Salida:
+```
+Línea uno
+Línea dos
+```
+Si quitaras el `\n` del primero, saldría `Línea unoLínea dos` pegado: el salto de línea lo pones tú (P7).
 
 **Ejemplo 3 — Un cálculo** *(intermedio)*
+> Enunciado: muestra `2 + 3 = 5`, donde el `5` lo calcula PHP.
 ```php
-echo "2 + 3 = ", 2 + 3, "\n";   // PHP calcula 2+3 y muestra 5
+echo "2 + 3 = ", 2 + 3, "\n";   // tres valores separados por coma; PHP resuelve 2 + 3 ANTES de mostrar (P6 §6)
+```
+Paso a paso, PHP muestra los tres valores de la coma, uno tras otro y **sin** espacios (P7):
+
+| # | valor | ¿con comillas? | qué muestra |
+|---|---|---|---|
+| 1 | `"2 + 3 = "` | sí → texto | `2 + 3 = ` |
+| 2 | `2 + 3` | no → cuenta | `5` (PHP calcula primero) |
+| 3 | `"\n"` | sí → salto de línea | *(baja de línea)* |
+
+Salida:
+```
+2 + 3 = 5
 ```
 
 **Ejemplo 4 — Comentarios** *(avanzado)*
+> Enunciado: mezcla comentarios con `echo` y observa qué llega a la pantalla.
 ```php
-// Esta línea es un comentario: PHP la ignora.
-echo "Esto sí se ve\n";
-/* Un bloque de
-   varias líneas tampoco se ejecuta. */
-echo "Y esto también\n";
+// Paso 1: esta línea es un comentario de una línea: PHP la ignora (P7 §6)
+echo "Esto sí se ve\n";        // Paso 2: este echo SÍ se ejecuta
+/* Paso 3: un bloque de
+   varias líneas tampoco se ejecuta. */ // (P8 §6)
+echo "Y esto también\n";       // Paso 4: este echo también se ejecuta
 ```
+Qué hace PHP con cada línea:
+
+| línea | ¿se ejecuta? | sale en pantalla |
+|---|---|---|
+| `// Paso 1: …` | no (comentario) | — |
+| `echo "Esto sí se ve\n";` | sí | `Esto sí se ve` |
+| `/* … */` | no (comentario de bloque) | — |
+| `echo "Y esto también\n";` | sí | `Y esto también` |
+
+Salida:
+```
+Esto sí se ve
+Y esto también
+```
+Los comentarios son notas para personas: PHP salta esas líneas y solo ejecuta los `echo`.
 
 ---
 

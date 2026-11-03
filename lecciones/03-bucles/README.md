@@ -107,22 +107,26 @@ echo "Hola, Grace\n";   // ¿y si son 500 personas? no se puede copiar y pegar 5
 > fondo en la [Lección 05](../05-arrays/); aquí solo las recorremos.)
 
 ## 7. 📐 Propiedades
-| # | Propiedad |
+| `foreach` y `for` | `while`, `break` y `continue` |
 |---|---|
-| **P1.** `foreach` recorre **todos** los elementos, en orden. |
-| **P2.** Un acumulador de suma empieza en **0**; uno de producto, en **1**. |
-| **P3.** `break` corta el bucle entero; `continue` solo salta **una** vuelta. |
-| **P4.** Un `while` cuya condición nunca cambia es **infinito** (nunca termina). |
+| **P1.** `foreach` da **una vuelta por elemento**, en orden; la variable toma el **siguiente** valor en cada vuelta. | **P5.** El `while` revisa la condición **antes** de cada vuelta: si al inicio ya es `false`, **no** da ninguna. |
+| **P2.** El acumulador se crea **antes** del bucle. Si lo creas dentro, se **reinicia** en cada vuelta. | **P6.** Dentro del `while`, algo debe acercar la condición a `false`; si no, es un **bucle infinito**. |
+| **P3.** Un acumulador de **suma** empieza en `0`; uno de **multiplicación**, en `1`. | **P7.** `break` sale del bucle **entero**; `continue` salta solo **esa** vuelta y sigue con la siguiente. |
+| **P4.** `for ($i = 0; $i < $n; $i++)` tiene tres partes: inicio, condición y paso; recorre de `0` a `$n - 1`. | **P8.** `break` y `continue` solo tienen sentido **dentro** de un bucle; fuera dan `Fatal error`. |
 
 ## 8. ⚠️ Errores frecuentes
 | # | ❌ Así no | Qué pasa | ✅ Así sí |
 |---|---|---|---|
-| E1 | `while (true) { }` sin salida | bucle **infinito** (el programa nunca termina) | que algo cambie y se pueda salir (condición o `break`) |
-| E2 | acumulador sin inicializar (`$s += $x`) | `Warning: Undefined variable $s` en la 1ª vuelta | inicializa antes: `$s = 0;` |
-| E3 | `5 % 0` | `DivisionByZeroError: Modulo by zero` | no dividas ni saques módulo por cero |
-| E4 | leer `$a[$i]` con `$i` fuera de rango | `Warning: Undefined array key` | recorre con `foreach` o cuida el `count()` |
+| E1 | `while (true) { }` sin salida | **sin mensaje:** bucle **infinito** (el programa nunca termina) | que algo cambie y se pueda salir (condición o `break`) |
+| E2 | acumular sin inicializar (`$s = $s + $x`) | `Warning: Undefined variable $s` en la 1ª vuelta | inicializa antes: `$s = 0;` |
+| E3 | `5 % 0` | `Fatal error: Uncaught DivisionByZeroError: Modulo by zero` | no saques módulo (ni dividas) por cero |
+| E4 | leer `$a[5]` con `5` fuera de rango | `Warning: Undefined array key 5` | recorre con `foreach` o cuida el `count()` |
+| E5 | `foreach (5 as $x) { }` | `Warning: foreach() argument must be of type array\|object, int given` | recorre un **array**: `foreach ([5] as $x)` |
+| E6 | `break;` fuera de un bucle | `Fatal error: 'break' not in the 'loop' or 'switch' context` | `break` y `continue` solo van **dentro** de un bucle |
+| E7 | `$total = 0;` **dentro** del `foreach` | **sin mensaje:** el total sale mal (se reinicia en cada vuelta) | crea `$total = 0;` **antes** del `foreach` (P2) |
 
-> 🔬 Mensajes reales de PHP 8.3.
+> 🔬 Mensajes reales de PHP 8.3. **E1 y E7 son los más traicioneros:** no hay mensaje de error, pero
+> el programa no termina (E1) o da un resultado equivocado (E7).
 
 ---
 
@@ -130,40 +134,101 @@ echo "Hola, Grace\n";   // ¿y si son 500 personas? no se puede copiar y pegar 5
 > Todos están en [`paso2-ejemplos-resueltos.php`](paso2-ejemplos-resueltos.php).
 
 **Ejemplo 1 — Saludar a muchos** *(fácil)*
+> Enunciado: saluda a Ada, Grace y Linus, cada uno en su línea; al final escribe `Fin`.
 ```php
-$personas = ["Ada", "Grace", "Linus"];   // Paso 1: la lista
-foreach ($personas as $persona) {         // Paso 2: una vuelta por cada una
-    echo "Hola, $persona\n";              // Paso 3: la acción repetida
+$personas = ["Ada", "Grace", "Linus"];   // Paso 1: los datos, en un array
+foreach ($personas as $persona) {         // Paso 2: una vuelta por cada uno (P1)
+    echo "Hola, $persona\n";              // Paso 3: lo que se repite (dentro de las llaves)
 }
+echo "Fin\n";                             // Paso 4: fuera del foreach -> corre UNA vez, al final
+```
+| vuelta | `$persona` | se muestra |
+|---|---|---|
+| 1 | `"Ada"` | `Hola, Ada` |
+| 2 | `"Grace"` | `Hola, Grace` |
+| 3 | `"Linus"` | `Hola, Linus` |
+| (fin) | — | `Fin` |
+
+Salida:
+```
+Hola, Ada
+Hola, Grace
+Hola, Linus
+Fin
 ```
 
 **Ejemplo 2 — Sumar con un acumulador** *(fácil)*
+> Enunciado: suma los precios `[10, 20, 30]`.
 ```php
-$suma = 0;                        // Paso 1: el acumulador empieza en 0
+$suma = 0;                        // Paso 1: el acumulador empieza en 0 (P3), ANTES del bucle (P2)
 foreach ([10, 20, 30] as $n) {    // Paso 2: recorrer
     $suma = $suma + $n;           // Paso 3: acumular
 }
 echo "Suma: $suma\n";              // -> 60
 ```
+| vuelta | `$n` | `$suma` después |
+|---|---|---|
+| (inicio) | — | `0` |
+| 1 | `10` | `10` |
+| 2 | `20` | `30` |
+| 3 | `30` | `60` |
+
+Salida:
+```
+Suma: 60
+```
 
 **Ejemplo 3 — Contar con un contador** *(intermedio)*
+> Enunciado: con el stock `[10, 0, 4, 0]`, cuenta cuántos productos están agotados (en 0).
 ```php
-$agotados = 0;
-foreach ([10, 0, 4, 0] as $cantidad) {
-    if ($cantidad === 0) { $agotados++; }   // contar los que están en 0
+$agotados = 0;                            // Paso 1: el contador empieza en 0, ANTES del bucle (P2)
+$stock = [10, 0, 4, 0];
+foreach ($stock as $cantidad) {           // Paso 2: recorrer
+    if ($cantidad === 0) {                // Paso 3: contar solo los que están en 0
+        $agotados++;
+    }
 }
-echo "Agotados: $agotados\n";                // -> 2
+echo "Agotados: $agotados\n";              // -> 2
+```
+| vuelta | `$cantidad` | ¿`=== 0`? | `$agotados` después |
+|---|---|---|---|
+| 1 | `10` | no | `0` |
+| 2 | `0` | sí | `1` |
+| 3 | `4` | no | `1` |
+| 4 | `0` | sí | `2` |
+
+Salida:
+```
+Agotados: 2
 ```
 
 **Ejemplo 4 — El primero que cumple, con `break`** *(avanzado)*
+> Enunciado: tres lotes, ya ordenados por preferencia, tienen `5`, `100` y `50` unidades.
+> Una línea pide `10`. Elige **el primer** lote que alcance y deja de buscar.
 ```php
 // batch = next(b for b in sorted(batches) if b.can_allocate(line))  (Cap. 1)
-$lotes = [["lote-a", 5], ["lote-b", 100], ["lote-c", 50]];
-$pedido = 10; $elegido = "ninguno";
-foreach ($lotes as $lote) {
-    if ($lote[1] >= $pedido) { $elegido = $lote[0]; break; }   // el PRIMERO que puede
+$lotes = [["lote-a", 5], ["lote-b", 100], ["lote-c", 50]];  // Paso 1: lotes en orden de preferencia
+$pedido = 10;                             // Paso 2: lo que pide la línea
+$elegido = "ninguno";                     // Paso 3: aquí guardo el elegido (ninguno todavía)
+foreach ($lotes as $lote) {               // Paso 4: recorrer en orden
+    if ($lote[1] >= $pedido) {            // Paso 5: el PRIMERO que alcance...
+        $elegido = $lote[0];
+        break;                            // ...y dejo de buscar (P7)
+    }
 }
-echo "Elegido: $elegido\n";          // -> lote-b
+echo "Elegido: $elegido\n";                // -> lote-b
+```
+| vuelta | `$lote` | `$lote[1]` | ¿`>= 10`? | acción |
+|---|---|---|---|---|
+| 1 | `["lote-a", 5]` | `5` | no | sigue |
+| 2 | `["lote-b", 100]` | `100` | sí | `$elegido = "lote-b"` y **`break`** |
+
+`lote-c` **nunca** se visita: el `break` cortó el bucle en la vuelta 2. Es la misma idea que
+`next(b for b in sorted(batches) if b.can_allocate(line))` del libro: recorrer **en orden** y
+quedarse con **el primero** que cumple.
+Salida:
+```
+Elegido: lote-b
 ```
 
 ---

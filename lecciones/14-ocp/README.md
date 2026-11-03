@@ -110,19 +110,22 @@ Agregar "vip" obliga a **editar** `precio` (y re-probar los casos viejos). Eso e
 ## 7. 📐 Propiedades
 | # | Propiedad |
 |---|---|
-| **P1** | El núcleo cerrado no se vuelve a tocar: menos riesgo de romper lo que andaba. |
-| **P2** | Se apoya en el **polimorfismo** (Lección 11) y en funciones como valores (Lección 04). |
-| **P3** | El registro y el message bus usan arrays (Lección 05). |
+| **P1** | El **núcleo cerrado** no se vuelve a tocar: así no se rompe lo que ya andaba. |
+| **P2** | Cada caso nuevo es **código nuevo**: se prueba solo, sin re-probar todos los viejos. |
+| **P3** | Se apoya en lo que ya sabes: **funciones como valores** (`callable`, Lección 04) y **polimorfismo** (Lección 11); el registro y el message bus usan **arrays** (Lección 05). |
 | **P4** | No abras **todo** por si acaso: abre el punto de extensión cuando el dolor aparece (YAGNI). |
+| **P5** | Un `if` pequeño y **estable** (que no crece) está bien; el problema es el que **crece** con cada caso. |
+| **P6** | "Cerrado" es para **agregar comportamiento**; los **bugs** sí se corrigen editando. |
 
 ## 8. ⚠️ Errores frecuentes
-| # | ❌ Así no | Qué pasa | ✅ Así sí |
+| # | ❌ Así no | Qué pasa (mensaje real de PHP 8.3) | ✅ Así sí |
 |---|---|---|---|
-| E1 | Abrir puntos de extensión "por si acaso" | Código abstracto sin necesidad | Abre cuando llega el **segundo** caso |
+| E1 | Abrir puntos de extensión "por si acaso" | Código abstracto sin necesidad (sobreingeniería) | Abre cuando llega el **segundo** caso real |
 | E2 | Dejar el `if/elif` y "además" un registro | Dos caminos que se contradicen | Un solo mecanismo de extensión |
 | E3 | Que cada subclase reimplemente el núcleo | Se pierde el "cerrado" | El núcleo llama al método polimórfico |
-| E4 | `$mapa["NO-EXISTE"]` revienta | `Warning: Undefined array key` | `$mapa[$c] ?? $porDefecto` |
-| E5 | Pasar el **resultado** en vez de la **función**: `precioFinal(100, descuento10(100))` | `TypeError`: un número no es `callable` | pasa la función: `precioFinal(100, 'descuento10')` |
+| E4 | `$mapa["NO-EXISTE"]` revienta | `Warning: Undefined array key "NO-EXISTE"` (y al llamarlo: `Error: Value of type null is not callable`) | `$mapa[$c] ?? $porDefecto` |
+| E5 | Pasar el **resultado** en vez de la **función**: `precioFinal(100, descuento10(100))` | `TypeError: precioFinal(): Argument #2 ($regla) must be of type callable, float given` | pasa la función sin llamarla: `precioFinal(100, 'descuento10')` |
+| E6 | Extender una clase abstracta y **olvidar** el método: `class EnvioRoto extends Envio {}` | `Fatal error: Class EnvioRoto contains 1 abstract method and must therefore be declared abstract or implement the remaining methods (Envio::costo)` | implementa el método en la extensión: `public function costo(): int { … }` |
 
 ---
 

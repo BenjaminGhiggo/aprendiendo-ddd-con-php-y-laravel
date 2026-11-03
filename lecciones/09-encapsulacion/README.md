@@ -119,14 +119,21 @@ Si el dato está expuesto, cualquiera lo deja en un valor que el negocio no perm
 | P2 | `readonly` se asigna **una vez** (en el constructor) y nunca más. |
 | P3 | La **promoción de propiedades** (`public function __construct(private int $x)`) declara y asigna en una línea. |
 | P4 | Un dato **calculado** nunca queda descuadrado: se recalcula cada vez que se pide. |
+| P5 | `private` es **por clase**, no por objeto: un método **sí** puede leer la propiedad privada de **otra instancia** de su misma clase (`$otro->x`). |
+| P6 | **Validar antes de cambiar**: si la regla lanza una excepción, el objeto queda **igual que antes**, no a medias (el `throw` corta el método). |
+| P7 | Una propiedad **tipada** sin valor inicial **no se puede leer** hasta asignarla: PHP da `Error: Typed property … must not be accessed before initialization`. |
+| P8 | `readonly` protege la **propiedad**: si guarda un **array**, su contenido tampoco cambia (`$c->a[] = 3` → `Error`); si guarda un **objeto**, no puedes **reemplazarlo**, pero sí mutar el objeto por dentro. |
 
 ## 8. ⚠️ Errores frecuentes
 | # | ❌ Así no | Qué pasa (mensaje real de PHP 8.3) | ✅ Así sí |
 |---|---|---|---|
 | E1 | `$c->privado` desde fuera | `Error: Cannot access private property Caja::$privado` | usa un getter: `$c->verPrivado()` |
 | E2 | `$l->referencia = "x"` (readonly) | `Error: Cannot modify readonly property Lote::$referencia` | fíjala en el constructor y no la cambies |
-| E3 | `new LoteStock(-5)` sin validar | el estado queda imposible | valida en el constructor: `throw new \InvalidArgumentException(...)` |
+| E3 | `new LoteStock(-5)` sin validar | el estado queda imposible (no hay error, pero el objeto es inválido) | valida en el constructor: `throw new \InvalidArgumentException(...)` |
 | E4 | exponer `public int $cantidad` | cualquiera la deja en `-999` | `private` + método `asignar()` que cuida la regla |
+| E5 | leer una propiedad **tipada sin inicializar**: `echo $l->cantidad` | `Error: Typed property Lote::$cantidad must not be accessed before initialization` | dale valor en el constructor (o un valor por defecto) |
+| E6 | asignar **otro tipo** a una propiedad tipada: `$c->cantidad = "diez"` sobre `int` | `TypeError: Cannot assign string to property Caja::$cantidad of type int` | asigna el tipo correcto: `$c->cantidad = 10` |
+| E7 | cambiar **y después** validar: `$this->saldo -= $n;` y luego `if ($this->saldo < 0) throw …` | no hay error de tipos, pero el objeto queda **a medias** (saldo negativo) aunque se lance la excepción | valida **primero**: `if ($n > $this->saldo) throw …;` y recién después resta |
 
 ---
 

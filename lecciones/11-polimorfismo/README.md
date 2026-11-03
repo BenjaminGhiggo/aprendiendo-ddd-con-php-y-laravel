@@ -118,14 +118,22 @@ Un `if` por tipo crece sin parar y hay que modificarlo cada vez que llega una fi
 | P1 | Una clase puede implementar **varias** interfaces: `implements A, B`. |
 | P2 | Si una clase dice `implements Figura` pero le falta `area()`, PHP da `Fatal error` al cargarla. |
 | P3 | `instanceof` también funciona con interfaces: `$cuadrado instanceof Figura` → `true`. |
-| P4 | A diferencia de Python, PHP **no** acepta un objeto "parecido": tiene que declarar `implements`. |
+| P4 | A diferencia de Python, PHP **no** acepta un objeto "parecido": tiene que declarar `implements` (no hay *duck typing* estructural). |
+| P5 | Quien **usa** el contrato (`areaTotal`) **no cambia** cuando aparece un tipo nuevo: solo se **agrega** una clase. |
+| P6 | Cada clase guarda **su propia** fórmula: el conocimiento vive **dentro** de la clase, no en un `if` lejano. |
+| P7 | El polimorfismo funciona **con** herencia (`extends` + sobrescribir, Lección 10) y **sin** herencia (clases distintas que implementan la misma interface). |
+| P8 | PHP también es polimórfico, pero con matices: `+` **suma** números y `.` **concatena** textos (a diferencia de Python/JS, donde `+` hace ambas); `count()` sirve para **arrays** y para objetos **`Countable`**. |
 
 ## 8. ⚠️ Errores frecuentes
-| # | ❌ Así no | Qué pasa | ✅ Así sí |
+| # | ❌ Así no | Qué pasa (mensaje real de PHP 8.3) | ✅ Así sí |
 |---|---|---|---|
-| E1 | Pasar algo que no implementa `Figura` a una función que pide `Figura` | `TypeError: Argument #1 ($f) must be of type Figura, string given` | pasa una clase que haga `implements Figura` |
-| E2 | `class X implements Figura {}` sin `area()` | `Fatal error: Class X contains 1 abstract method and must … implement the remaining methods (Figura::area)` | implementa todos los métodos del contrato |
-| E3 | Un `if ($tipo === ...)` por cada clase | crece y hay que tocarlo con cada tipo nuevo | polimorfismo: cada clase sabe lo suyo |
+| E1 | Pasar algo que no implementa `Figura` a una función que pide `Figura`: `area("hola")` | `TypeError: area(): Argument #1 ($f) must be of type Figura, string given` | pasa una clase que haga `implements Figura` |
+| E2 | `class X implements Figura {}` sin `area()` | `Fatal error: Class X contains 1 abstract method and must therefore be declared abstract or implement the remaining methods (Figura::area)` | implementa todos los métodos del contrato |
+| E3 | Clase `Q` con `area()` pero **sin** `implements Figura`, pasada a una función que pide `Figura` | `TypeError: f(): Argument #1 ($f) must be of type Figura, Q given` (tener el método no basta: PHP exige `implements`) | declara `class Q implements Figura` |
+| E4 | Implementar con **otra firma**: `public function area(): string` en vez de `: float` | `Fatal error: Declaration of C::area(): string must be compatible with Figura::area(): float` | respeta la **firma** del contrato: `area(): float` |
+| E5 | Llamar a un método con el **nombre mal escrito**: `$c->areaa()` | `Error: Call to undefined method C::areaa()` | usa el nombre exacto: `$c->area()` |
+| E6 | Instanciar la interface: `new Figura()` | `Error: Cannot instantiate interface Figura` | instancia una clase que la implemente: `new Cuadrado(2)` |
+| E7 | Un `if ($tipo === ...)` por cada clase | crece y hay que tocarlo con cada tipo nuevo (y un tipo olvidado suma mal en silencio) | polimorfismo: cada clase sabe lo suyo |
 
 ---
 
@@ -169,36 +177,47 @@ echo guardarDos(new RepoMemoria());     // 2 (y mañana un RepoBaseDeDatos sin t
 
 ## 10. 📝 Problemas propuestos
 **🟢 Nivel básico**
-1. `interface Saludo { public function texto(): string; }` con `Es` (`"hola"`). Muéstralo.
-2. Agrega `En` (`"hello"`) que implemente `Saludo`. Muéstralo.
-3. Función `saludar(Saludo $s)` que devuelva su texto; pásale un `Es`.
-4. Comprueba con `instanceof` que un `Es` **es un** `Saludo`.
+1. `interface Animal { public function sonido(): string; }` con `Perro` (`"Guau"`) y `Gato` (`"Miau"`), **sin herencia entre ellas**. Ponlos en un array y recórrelo imprimiendo cada sonido con un `foreach`.
+2. Agrega `Vaca` (`"Muu"`) que implemente `Animal`, agrégala al **mismo** array y repite el `foreach` **sin cambiarlo**.
+3. Comprueba con `instanceof` que un `Perro` **es un** `Animal` (y que un `Gato` también).
+4. El lenguaje también es polimórfico: muestra `10 + 5`, `"ab" . "cd"`, `count([1, 2, 3])` y `strlen("mesa")`. (OJO: en PHP `+` suma y `.` concatena.)
 
 **🟡 Nivel intermedio**
 
-5. `interface Notificador { public function enviar(string $m): string; }` con `Email` y `Sms`. Recórrelos en un array enviando `"hola"`.
-6. Función `avisar(Notificador $n, string $m)`; pásale un `Email` con `"stock"`.
-7. Lo mismo con un `Sms`.
-8. Muestra cuántos canales hay en el array.
+5. Escribe `hacerSonar(array $animales): array` que devuelva un array con el sonido de cada animal. Pruébala con `Perro`, `Gato` y `Vaca`.
+6. `interface MedioPago { public function pagar(int $monto): string; }` con `Efectivo`, `Tarjeta` (agrega 3 % de comisión) y `Transferencia`, cada una con su mensaje. Recórrelas pagando `100`.
+7. `interface Describible { public function describir(): string; }` con `Libro` (`"Libro: …"`) y `Pelicula` (`"Película: …"`), **sin parentesco entre sí**. Escribe `describirTodo(array $items)` que imprima cada descripción. Pruébala con `"Rayuela"` y `"Up"`.
+8. Recorre un array **mixto** `[new Libro("Rayuela"), 42, new Pelicula("Up")]`: si el elemento es `instanceof Describible`, llama `describir()`; si no, imprime `"<valor> no sabe describirse"`.
 
 **🔴 Nivel avanzado**
 
-9. `interface Figura { public function area(): float; }` con `Cuadrado` y `Circulo`. Suma las áreas de `[Cuadrado(2), Circulo(1), Cuadrado(3)]`.
-10. Muestra el área de un `Cuadrado(5)`.
-11. Agrega `Rectangulo` y comprueba que la función de suma **no cambia**.
-12. *(Puente al libro)* `interface RepositorioDeLotes` con `agregar`/`obtener` y un `RepoMemoria` que la implemente (como el duck typing del Cap. 2, pero explícito). Agrega `"lote-001"` y obténlo.
+9. Polimorfismo **con herencia**: `Empleado(sueldo)->pago()` devuelve el sueldo; `Freelance(horas, tarifa)` es **hija** y paga `horas × tarifa`. Suma el `pago()` de `[Empleado(2000), Freelance(10, 50)]`.
+10. `interface Notificador { public function enviar(string $m): string; }` con `Email`, `Sms` y `Chat`. Escribe `notificarATodos(array $canales, string $m): array` e imprime el resultado con `"hola"`.
+11. Escribe `totalConIfs(array $figuras)` (con `instanceof Cuadrado` / `instanceof Circulo`) y `totalPolimorfico(array $figuras)` (con `area()`). Pruébalas con `[Cuadrado(2), Rectangulo(2, 3)]` **sin** agregar el rectángulo a los `if`. ¿Qué da cada una?
+12. *(Puente al libro)* `interface Repositorio` con `agregar(string $ref)` y `obtener(string $ref)`, y **dos** clases sin parentesco: `RepositorioEnMemoria` y `RepositorioQueRegistra` (que además anota cada referencia en un array `registro`). Escribe `guardarTodos(Repositorio $repo, array $refs)`, úsala con las dos para `["L1", "L2"]`, e imprime `obtener("L2")` de cada una y el registro.
 
 ## 11. 🔑 Claves (respuestas)
 <details><summary>Ver claves (solo después de intentarlo)</summary>
 
-| # | Salida | # | Salida | # | Salida |
-|---|---|---|---|---|---|
-| 1 | `hola` | 5 | `EMAIL: hola` / `SMS: hola` | 9 | `16.14` |
-| 2 | `hello` | 6 | `EMAIL: stock` | 10 | `25` |
-| 3 | `hola` | 7 | `SMS: stock` | 11 | `6` |
-| 4 | `true` | 8 | `2 canales` | 12 | `lote-001` |
+| # | Salida esperada | Fórmula clave |
+|---|---|---|
+| 1 | `Guau` / `Miau` | PO4 + PO5 |
+| 2 | `Guau` / `Miau` / `Muu` (el `foreach` no cambió) | P5 |
+| 3 | `true` / `true` | PO3 + P3 |
+| 4 | `15 abcd 3 4` | P8 |
+| 5 | `Guau, Miau, Muu` | PO6 |
+| 6 | `Pagaste 100 en efectivo` / `… con tarjeta (comisión 3)` / `… por transferencia` | PO5 |
+| 7 | `Libro: Rayuela` / `Película: Up` | P7 (sin parentesco) |
+| 8 | `Libro: Rayuela` / `42 no sabe describirse` / `Película: Up` | E3 (PHP pregunta con `instanceof`) |
+| 9 | `2500` (2000 + 10 × 50) | P7 (con herencia) |
+| 10 | `Email: hola / SMS: hola / Chat: hola` | PO6 |
+| 11 | con ifs = `4` (¡el rectángulo no se sumó!) · polimórfico = `10` | E7 + P6 |
+| 12 | `L2 L2 [L1, L2]` | PO3 + P4 |
 
-Código completo en [`paso5-solucionario/`](paso5-solucionario/).
+Código completo en [`paso5-solucionario/`](paso5-solucionario/):
+[`nivel-basico.php`](paso5-solucionario/nivel-basico.php) ·
+[`nivel-intermedio.php`](paso5-solucionario/nivel-intermedio.php) ·
+[`nivel-avanzado.php`](paso5-solucionario/nivel-avanzado.php).
 </details>
 
 ---
