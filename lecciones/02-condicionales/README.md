@@ -74,6 +74,17 @@ Sin condicionales, el programa no puede reaccionar a los datos: hace siempre lo 
 > - **Ternario:** `condición ? siVerdadero : siFalso` — elige un valor en una línea.
 > - **`match`:** compara un valor contra varios casos (con `===`).
 
+> **🧮 Tabla de verdad**
+>
+> | `$a` | `$b` | `$a && $b` (y) | `$a \|\| $b` (o) | `!$a` (no) |
+> |---|---|---|---|---|
+> | `true` | `true` | `true` | `true` | `false` |
+> | `true` | `false` | `false` | `true` | `false` |
+> | `false` | `true` | `false` | `true` | `true` |
+> | `false` | `false` | `false` | `false` | `true` |
+>
+> `&&` es `true` solo si **ambas**; `||` es `true` si **al menos una**; `!` **invierte**.
+
 > **🧠 Regla de oro**
 > Usa **`===`** (no `==`) para comparar, y pon los `elseif` **del caso más específico al más general**.
 

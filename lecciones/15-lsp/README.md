@@ -125,31 +125,103 @@ porque el cuadrado cambia una regla (invariante) que el rectángulo no tenía.
 ## 9. ✍️ Ejemplos resueltos (violación → arreglo)
 > Todos están en [`paso2-ejemplos-resueltos.php`](paso2-ejemplos-resueltos.php).
 
-**Ejemplo 1 — Test de contrato reutilizable (LS4)**
+**Ejemplo 1 — Dos repositorios intercambiables (LS4)** *(fácil)*
+> Enunciado: una función de alto nivel que funcione con **cualquier** repositorio que cumpla el
+> contrato `agregar` / `obtener`.
 ```php
-function probarContrato(Repo $repo): string { $repo->agregar("L1"); return ($repo->obtener("L1") === "L1" && $repo->obtener("X") === null) ? "OK" : "FALLA"; }
-echo probarContrato(new RepoDict());   // -> OK
+abstract class RepositorioAbstracto {
+    abstract public function agregar(string $ref): void;
+    abstract public function obtener(string $ref): ?string;
+}
+class RepositorioEnMemoria extends RepositorioAbstracto {
+    private array $datos = [];
+    public function agregar(string $ref): void { $this->datos[$ref] = $ref; }
+    public function obtener(string $ref): ?string { return $this->datos[$ref] ?? null; }
+}
+class RepositorioFalso extends RepositorioAbstracto {
+    private array $datos = [];
+    public function agregar(string $ref): void { $this->datos[$ref] = true; }
+    public function obtener(string $ref): ?string { return isset($this->datos[$ref]) ? $ref : null; }
+}
+// Escrita para la MADRE: funciona igual con las dos hijas.
+function guardarYLeer(RepositorioAbstracto $repo, string $ref): ?string {
+    $repo->agregar($ref);
+    return $repo->obtener($ref);
+}
+echo guardarYLeer(new RepositorioEnMemoria(), "LOTE-001");   // -> LOTE-001
+echo guardarYLeer(new RepositorioFalso(), "LOTE-001");       // -> LOTE-001
 ```
 
-**Ejemplo 2 — El falso cumple el mismo contrato que el real (cap. 2)**
+**Ejemplo 2 — El pingüino que no vuela (LS5)** *(fácil)*
+> Enunciado: `PinguinoMalo extends AveMala` hereda `volar()` pero lanza un error. Arregla la jerarquía.
 ```php
-echo probarContrato(new RepoSet());    // -> OK (un set, pero mismo contrato)
-```
+// Paso 1 (violación): la hija lanza un error que la madre no lanzaba.
+class AveMala { public function volar(): string { return "vuela"; } }
+class PinguinoMalo extends AveMala {
+    public function volar(): string { throw new \RuntimeException("los pingüinos no vuelan"); }
+}
+// (new PinguinoMalo())->volar()  ->  ROMPE: los pingüinos no vuelan
 
-**Ejemplo 3 — No lanzar errores nuevos (LS5): separar la jerarquía**
-```php
+// Paso 2 (arreglo): la madre solo promete lo que TODAS cumplen (comer); volar baja a AveVoladora.
 class Ave { public function comer(): string { return "come"; } }
 class AveVoladora extends Ave { public function volar(): string { return "vuela"; } }
-$pinguino = new Ave();   // el pingüino NO es AveVoladora, así nadie espera que vuele
-echo $pinguino->comer();
+class Pato extends AveVoladora {}
+class Pinguino extends Ave { public function nadar(): string { return "nada"; } }
+foreach ([new Pato(), new Pinguino()] as $ave) { echo $ave->comer(); }   // -> come / come
 ```
 
-**Ejemplo 4 — Cuadrado-rectángulo como hermanos (LS6)**
+**Ejemplo 3 — Rectángulo y Cuadrado (LS6)** *(intermedio)*
+> Enunciado: `CuadradoMalo extends RectanguloMalo` rompe `agrandar`. Muestra el fallo y arréglalo.
 ```php
+// Paso 1 (violación): Cuadrado fuerza lados iguales y rompe a quien confía en lados independientes.
+class RectanguloMalo {
+    protected int $ancho = 0; protected int $alto = 0;
+    public function ponerAncho(int $a): void { $this->ancho = $a; }
+    public function ponerAlto(int $a): void { $this->alto = $a; }
+    public function area(): int { return $this->ancho * $this->alto; }
+}
+class CuadradoMalo extends RectanguloMalo {
+    public function ponerAncho(int $a): void { $this->ancho = $a; $this->alto = $a; }
+    public function ponerAlto(int $a): void { $this->ancho = $a; $this->alto = $a; }
+}
+function agrandar(RectanguloMalo $r): int { $r->ponerAncho(5); $r->ponerAlto(4); return $r->area(); }
+// agrandar(new RectanguloMalo()) -> 20  ;  agrandar(new CuadradoMalo()) -> 16 (ROMPE)
+
+// Paso 2 (arreglo): HERMANOS bajo Figura, no padre-hijo. Comparten solo area().
 class Figura { public function area(): int { return 0; } }
-class Rectangulo extends Figura { /* a*b */ }
-class Cuadrado extends Figura { /* l*l */ }   // hermanos, no padre-hijo
+class Rectangulo extends Figura {
+    public function __construct(private int $a, private int $b) {}
+    public function area(): int { return $this->a * $this->b; }
+}
+class Cuadrado extends Figura {
+    public function __construct(private int $l) {}
+    public function area(): int { return $this->l * $this->l; }
+}
+function areaTotal(array $figuras): int { $t = 0; foreach ($figuras as $f) { $t += $f->area(); } return $t; }
+echo areaTotal([new Rectangulo(5, 4), new Cuadrado(3)]);   // -> 29
 ```
+
+**Ejemplo 4 — Un test de contrato para el real y el falso (cap. 2)** *(avanzado)*
+> Enunciado: **una sola** función de prueba que todo repositorio deba pasar, y úsala para descubrir
+> un falso "con trampa".
+```php
+function probarContrato(RepositorioAbstracto $repo): string {
+    $repo->agregar("L1");
+    if ($repo->obtener("L1") !== "L1") { throw new \RuntimeException("lo agregado se debe poder obtener"); }
+    if ($repo->obtener("NO-EXISTE") !== null) { throw new \RuntimeException("lo no agregado debe dar null"); }
+    return "OK";
+}
+echo probarContrato(new RepositorioEnMemoria());   // -> OK
+echo probarContrato(new RepositorioFalso());       // -> OK
+// Un falso que guarda en minúsculas extiende la clase igual, pero NO cumple el contrato:
+class RepositorioFalsoConTrampa extends RepositorioAbstracto {
+    private array $datos = [];
+    public function agregar(string $ref): void { $this->datos[strtolower($ref)] = strtolower($ref); }
+    public function obtener(string $ref): ?string { return $this->datos[$ref] ?? null; }
+}
+// probarContrato(new RepositorioFalsoConTrampa()) -> FALLA: lo agregado se debe poder obtener
+```
+Solo el **test de contrato** descubre al falso con trampa; PHP lo deja extender la clase sin quejarse.
 
 ---
 
